@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Cálculo do DAS – Simples Nacional</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+:root{
+  --bg:#0f172a;
+  --card:#020617;
+  --text:#e5e7eb;
+  --muted:#94a3b8;
+  --border:#1e293b;
+  --primary:#38bdf8;
+  --danger:#ef4444;
+}
+body.light{
+  --bg:#f8fafc;
+  --card:#ffffff;
+  --text:#020617;
+  --muted:#475569;
+  --border:#cbd5e1;
+}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+}
+.container{
+  max-width:720px;
+  margin:auto;
+  padding:16px;
+}
+.card{
+  background:var(--card);
+  padding:20px;
+  border-radius:12px;
+}
+h1{
+  text-align:center;
+  font-size:20px;
+  margin-bottom:16px;
+}
+label{
+  font-size:14px;
+  display:block;
+  margin-top:12px;
+}
+input,select{
+  width:100%;
+  padding:9px 10px;
+  margin-top:6px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+  font-size:14px;
+}
+.error{
+  color:var(--danger);
+  font-size:12px;
+  margin-top:4px;
+}
+.preview{
+  font-size:13px;
+  margin-top:6px;
+  color:var(--primary);
+}
+button{
+  margin-top:16px;
+  width:100%;
+  padding:11px;
+  font-size:16px;
+  border:none;
+  border-radius:8px;
+  background:var(--primary);
+  color:#020617;
+  cursor:pointer;
+}
+footer{
+  text-align:center;
+  margin-top:20px;
+  font-size:12px;
+  color:var(--muted);
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="card">
+    <h1>Cálculo do DAS – Simples Nacional</h1>
+
+    <!-- Campo 1 -->
+    <label>Campo 1: Nome da Empresa (opcional)</label>
+    <input id="empresa">
+
+    <!-- Campo 2 -->
+    <label>Campo 2: Responsável pelo cálculo (opcional)</label>
+    <input id="responsavel">
+
+    <!-- Campo 3 -->
+    <label>Campo 3: Anexo do Simples Nacional</label>
+    <select id="anexo" onchange="atualizarNominal()">
+      <option value="">Selecione...</option>
+      <option value="I">Anexo I</option>
+      <option value="II">Anexo II</option>
+      <option value="III">Anexo III</option>
+      <option value="IV">Anexo IV</option>
+      <option value="V">Anexo V</option>
+    </select>
+    <div id="erro3" class="error"></div>
+
+    <!-- Campo 4 -->
+    <label>Campo 4: Faturamento bruto acumulado 12 meses (RBT12)</label>
+    <input id="rbt12" oninput="atualizarNominal()">
+    <div id="prev4" class="preview"></div>
+    <div id="erro4" class="error"></div>
+
+    <!-- Campo 5 -->
+    <label>Campo 5: Faturamento do mês atual</label>
+    <input id="mes" oninput="atualizarEfetiva()">
+    <div id="prev5" class="preview"></div>
+    <div id="erro5" class="error"></div>
+
+    <!-- Botões -->
+    <button onclick="calcular()">Calcular DAS</button>
+    <button id="btnPdf" onclick="gerarPDF()" style="display:none;">
+      Gerar PDF
+    </button>
+  </div>
+
+  <footer>
+    | © 2026: Zaqueu Fernandes (88) 9 9401-4262
+  </footer>
+
+</div>
+
+<script>
+/* ================= TABELAS OFICIAIS ================= */
+const anexos = {
+ I:[[180000,0.04,0],[360000,0.073,5940],[720000,0.095,13860],[1800000,0.107,22500],[3600000,0.143,87300],[4800000,0.19,378000]],
+ II:[[180000,0.045,0],[360000,0.078,5940],[720000,0.10,13860],[1800000,0.112,22500],[3600000,0.147,85500],[4800000,0.30,720000]],
+ III:[[180000,0.06,0],[360000,0.112,9360],[720000,0.135,17640],[1800000,0.16,35640],[3600000,0.21,125640],[4800000,0.33,648000]],
+ IV:[[180000,0.045,0],[360000,0.09,8100],[720000,0.102,12420],[1800000,0.14,39780],[3600000,0.22,183780],[4800000,0.33,828000]],
+ V:[[180000,0.155,0],[360000,0.18,4500],[720000,0.195,9900],[1800000,0.205,17100],[3600000,0.23,62100],[4800000,0.305,540000]]
+};
+
+function obterFaixa(anexo,rbt){
+  return anexos[anexo].find(f=>rbt<=f[0]);
+}
+
+/* ================= PRÉVIA NOMINAL ================= */
+function atualizarNominal(){
+  const anexoVal = anexo.value;
+  const rbt = parseFloat(rbt12.value);
+  prev4.innerText = "";
+  if(!anexoVal || isNaN(rbt)) return;
+
+  const f = obterFaixa(anexoVal,rbt);
+  prev4.innerText =
+    `Alíquota Nominal: ${(f[1]*100).toFixed(2)}% | Parcela a Deduzir: R$ ${f[2].toLocaleString("pt-BR",{minimumFractionDigits:2})}`;
+}
+
+/* ================= PRÉVIA EFETIVA ================= */
+function atualizarEfetiva(){
+  const anexoVal = anexo.value;
+  const rbt = parseFloat(rbt12.value);
+  const mesVal = parseFloat(mes.value);
+  prev5.innerText = "";
+  if(!anexoVal || isNaN(rbt) || isNaN(mesVal)) return;
+
+  const f = obterFaixa(anexoVal,rbt);
+  const aliqEf = ((rbt * f[1]) - f[2]) / rbt;
+  prev5.innerText = `Alíquota Efetiva: ${(aliqEf*100).toFixed(2)}%`;
+}
+
+/* ================= CÁLCULO ================= */
+let resultado = null;
+
+function calcular(){
+  erro3.innerText = erro4.innerText = erro5.innerText = "";
+  btnPdf.style.display = "none";
+
+  const anexoVal = anexo.value;
+  const rbt = parseFloat(rbt12.value);
+  const mesVal = parseFloat(mes.value);
+
+  let erro = false;
+
+  if(!anexoVal){
+    erro3.innerText = "Selecione o Anexo corretamente";
+    erro = true;
+  }
+  if(isNaN(rbt)){
+    erro4.innerText = "Este campo é obrigatório, preencha corretamente";
+    erro = true;
+  }
+  if(isNaN(mesVal)){
+    erro5.innerText = "Este campo é obrigatório, preencha corretamente";
+    erro = true;
+  }
+  if(erro) return;
+
+  const f = obterFaixa(anexoVal,rbt);
+  const aliqEf = ((rbt * f[1]) - f[2]) / rbt;
+  const das = mesVal * aliqEf;
+
+  resultado = {
+    empresa: empresa.value || "-",
+    responsavel: responsavel.value || "-",
+    anexo: anexoVal,
+    rbt,
+    mes: mesVal,
+    aliqNominal: f[1],
+    parcela: f[2],
+    aliqEf,
+    das
+  };
+
+  btnPdf.style.display = "block";
+}
+
+/* ================= PDF ================= */
+function gerarPDF(){
+  if(!resultado) return;
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+
+  pdf.setFontSize(14);
+  pdf.text("Cálculo do DAS – Simples Nacional",105,15,{align:"center"});
+  pdf.line(10,18,200,18);
+
+  let y = 30;
+  pdf.setFontSize(11);
+
+  pdf.text(`Empresa: ${resultado.empresa}`,10,y); y+=8;
+  pdf.text(`Responsável: ${resultado.responsavel}`,10,y); y+=8;
+  pdf.text(`Anexo: ${resultado.anexo}`,10,y); y+=8;
+  pdf.text(`RBT12: R$ ${resultado.rbt.toLocaleString("pt-BR",{minimumFractionDigits:2})}`,10,y); y+=8;
+  pdf.text(`Faturamento do mês: R$ ${resultado.mes.toLocaleString("pt-BR",{minimumFractionDigits:2})}`,10,y); y+=8;
+  pdf.text(`Alíquota Nominal: ${(resultado.aliqNominal*100).toFixed(2)}%`,10,y); y+=8;
+  pdf.text(`Parcela a Deduzir: R$ ${resultado.parcela.toLocaleString("pt-BR",{minimumFractionDigits:2})}`,10,y); y+=8;
+  pdf.text(`Alíquota Efetiva: ${(resultado.aliqEf*100).toFixed(2)}%`,10,y); y+=10;
+  pdf.setFontSize(13);
+  pdf.text(`DAS do mês: R$ ${resultado.das.toLocaleString("pt-BR",{minimumFractionDigits:2})}`,10,y);
+
+  pdf.line(10,280,200,280);
+  pdf.setFontSize(9);
+  pdf.text(
+    `Gerado em: ${new Date().toLocaleString("pt-BR")} | © 2026: Zaqueu Fernandes (88) 9 9401-4262`,
+    105,286,{align:"center"}
+  );
+
+  pdf.save("DAS_Simples_Nacional.pdf");
+}
+</script>
+
+</body>
+</html>
