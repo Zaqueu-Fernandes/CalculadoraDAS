@@ -554,7 +554,7 @@
         // Atualizar prévia quando anexo mudar
         document.getElementById('anexo').addEventListener('change', function() {
             if (anexoAnterior && anexoAnterior !== this.value && calculoAtual) {
-                alert('Você mudou o Anexo, Clique novamente em Gerar DAS para atualizar o cálculo.');
+                alert('Você mudou o Anexo, Clique novamente em Calcular DAS para atualizar o cálculo.');
             }
             anexoAnterior = this.value;
             calcularPrevia();
@@ -761,4 +761,5 @@
         }
     </script>
 </body>
+
 </html>
