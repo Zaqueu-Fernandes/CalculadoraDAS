@@ -44,13 +44,10 @@
         .dark .preview { background-color: #4a5568; color: #a0aec0; }
         .light .preview { background-color: #edf2f7; color: #718096; }
         .preview.show { display: block; }
-
-        /* Estilos das Caixinhas do Fator R */
         .checkbox-group { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; cursor: pointer; }
         .checkbox-group input { width: 20px; height: 20px; cursor: pointer; }
         .hidden-field { display: none; margin-top: 10px; padding-left: 30px; }
         .hidden-field.show { display: block; }
-
         .btn { width: 100%; height: 56px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; margin-bottom: 12px; }
         .btn-primary { background-color: #4299e1; color: white; }
         .btn-success { background-color: #48bb78; color: white; display: none; }
@@ -105,7 +102,6 @@
 
                     <div id="blocoFatorR" style="display: none; background: rgba(66, 153, 225, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #4299e1;">
                         <p style="font-size: 13px; margin-bottom: 15px; font-weight: bold; color: #4299e1;">🔍 Verificação de Gasto com Pessoal (Fator R)</p>
-                        
                         <label class="checkbox-group">
                             <input type="checkbox" id="temProlabore"> Tem Pró-labore?
                         </label>
@@ -137,7 +133,7 @@
                     </div>
 
                     <button type="submit" class="btn btn-primary">📟 Calcular DAS</button>
-                    <button type="button" class="btn btn-success" id="btnPdf">📥 Gerar PDF</button>
+                    <button type="button" class="btn btn-success" id="btnPdf">📥 Gerar PDF Profissional</button>
                 </form>
 
                 <div class="result" id="resultado">
@@ -178,7 +174,7 @@
             i.value = 'R$ ' + v.replace('.', ',').replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
         }
 
-        document.querySelectorAll('input[placeholder*="R$"], #rbt12, #faturamentoMes').forEach(input => {
+        document.querySelectorAll('input[placeholder*="R$"]').forEach(input => {
             input.addEventListener('input', () => { 
                 aplicarMascara(input); 
                 if(input.id === 'valorProlabore') validarProlabore(input);
@@ -208,12 +204,7 @@
         });
 
         document.getElementById('temProlabore').onclick = function() { 
-            const field = document.getElementById('fieldProlabore');
-            field.classList.toggle('show', this.checked);
-            if(!this.checked) {
-                document.getElementById('valorProlabore').classList.remove('error');
-                document.getElementById('errorMinProlabore').classList.remove('show');
-            }
+            document.getElementById('fieldProlabore').classList.toggle('show', this.checked);
         };
         document.getElementById('temFolha').onclick = function() { document.getElementById('fieldFolha').classList.toggle('show', this.checked); };
 
@@ -233,21 +224,19 @@
 
         document.getElementById('dasForm').onsubmit = function(e) {
             e.preventDefault();
-            
-            // Validar Prolabore antes de processar
             if(document.getElementById('temProlabore').checked && !validarProlabore(document.getElementById('valorProlabore'))) {
-                alert('O valor do Pró-labore não pode ser inferior ao salário-mínimo (R$ 1.621,00).');
-                return;
+                alert('Pró-labore abaixo do mínimo legal.'); return;
             }
 
             let anexoReal = selectAnexo.value;
             const rbt12 = parseMoeda(document.getElementById('rbt12').value);
             const fatMes = parseMoeda(document.getElementById('faturamentoMes').value);
+            const vProlabore = parseMoeda(document.getElementById('valorProlabore').value);
+            const vFolha = parseMoeda(document.getElementById('valorFolha').value);
             let descFatorR = "";
 
             if (anexoReal === 'FATOR_R') {
-                const totalPessoal = parseMoeda(document.getElementById('valorProlabore').value) + parseMoeda(document.getElementById('valorFolha').value);
-                const ratio = totalPessoal / rbt12;
+                const ratio = (vProlabore + vFolha) / rbt12;
                 anexoReal = (ratio >= 0.28) ? 'III' : 'V';
                 descFatorR = `Fator R: ${(ratio * 100).toFixed(2)}% -> Enquadrado no Anexo ${anexoReal}`;
             }
@@ -256,7 +245,12 @@
             const aliqEf = ((rbt12 * (faixa.aliquota / 100)) - faixa.deducao) / rbt12 * 100;
             const vDas = fatMes * (aliqEf / 100);
 
-            calculoAtual = { empresa: document.getElementById('empresa').value, anexo: anexoReal, fatMes, aliqNom: faixa.aliquota, aliqEf, vDas, descFatorR };
+            calculoAtual = { 
+                empresa: document.getElementById('empresa').value || 'Não Informada', 
+                responsavel: document.getElementById('responsavel').value || 'Não Informado',
+                anexo: anexoReal, 
+                fatMes, rbt12, vProlabore, vFolha, aliqEf, vDas, descFatorR 
+            };
             
             document.getElementById('infoFatorR').textContent = descFatorR;
             document.getElementById('valorDas').textContent = formatarMoeda(vDas);
@@ -274,14 +268,63 @@
         document.getElementById('btnPdf').onclick = function() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            doc.text('Cálculo DAS Simples Nacional', 20, 20);
-            doc.text(`Empresa: ${calculoAtual.empresa || 'N/A'}`, 20, 40);
-            doc.text(`Anexo: ${calculoAtual.anexo}`, 20, 50);
-            doc.text(`${calculoAtual.descFatorR}`, 20, 60);
-            doc.text(`Faturamento Mês: ${formatarMoeda(calculoAtual.fatMes)}`, 20, 70);
-            doc.text(`Alíquota Efetiva: ${calculoAtual.aliqEf.toFixed(2)}%`, 20, 80);
-            doc.text(`VALOR DAS: ${formatarMoeda(calculoAtual.vDas)}`, 20, 100);
-            doc.save('DAS.pdf');
+            const dataHora = new Date().toLocaleString('pt-BR');
+
+            // Topo
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(16);
+            doc.text('Cálculo DAS Simples Nacional', 105, 20, { align: 'center' });
+            doc.setLineWidth(0.2);
+            doc.line(20, 25, 190, 25);
+
+            // Corpo - Informações à esquerda
+            doc.setFontSize(11);
+            let y = 35;
+            const spacing = 8;
+
+            const printLine = (label, value, boldValue = false) => {
+                doc.setFont('helvetica', 'bold');
+                doc.text(label, 20, y);
+                doc.setFont('helvetica', boldValue ? 'bold' : 'normal');
+                doc.text(String(value), 95, y);
+                y += spacing;
+            };
+
+            printLine('Empresa:', calculoAtual.empresa);
+            printLine('Responsável pelo Cálculo:', calculoAtual.responsavel);
+            printLine('Anexo:', calculoAtual.anexo);
+            
+            if(calculoAtual.descFatorR) {
+                doc.setTextColor(66, 153, 225);
+                printLine('Fator R:', calculoAtual.descFatorR);
+                doc.setTextColor(0, 0, 0);
+            }
+
+            printLine('Soma Pró-labore (12 meses):', formatarMoeda(calculoAtual.vProlabore));
+            printLine('Soma Salários/FGTS (12 meses):', formatarMoeda(calculoAtual.vFolha));
+            printLine('Faturamento bruto (RBT12):', formatarMoeda(calculoAtual.rbt12));
+            printLine('Faturamento Mês:', formatarMoeda(calculoAtual.fatMes));
+            printLine('Alíquota Efetiva:', calculoAtual.aliqEf.toFixed(2) + '%');
+
+            // Destaque do Valor DAS
+            y += 5;
+            doc.setFillColor(245, 245, 245);
+            doc.rect(20, y-5, 170, 15, 'F');
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('VALOR DAS:', 25, y+5);
+            doc.text(formatarMoeda(calculoAtual.vDas), 95, y+5);
+
+            // Rodapé
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(100);
+            doc.setLineWidth(0.1);
+            doc.line(20, 275, 190, 275);
+            doc.text(`Gerado em: ${dataHora}`, 20, 282);
+            doc.text('© Copyright 2026: Zaqueu Fernandes (88)9.9401-4262', 105, 282, { align: 'center' });
+
+            doc.save(`DAS_${calculoAtual.empresa.replace(/\s+/g, '_')}.pdf`);
         };
     </script>
 </body>
