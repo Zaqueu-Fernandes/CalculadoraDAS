@@ -62,7 +62,10 @@
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; }
         .modal-content { background: white; padding: 30px; border-radius: 16px; max-width: 400px; width: 90%; text-align: center; color: #2d3748; }
         .pix-key { background: #f7fafc; padding: 12px; border-radius: 8px; border: 2px dashed #cbd5e0; font-family: monospace; margin: 15px 0 5px 0; font-weight: bold; font-size: 14px; word-break: break-all; }
-        .favorecido-info { font-size: 12px; color: #718096; margin-bottom: 15px; font-weight: 500; }
+        
+        /* AJUSTE REALIZADO AQUI: Removido o uppercase */
+        .favorecido-info { font-size: 12px; color: #718096; margin-bottom: 15px; font-weight: 600; letter-spacing: 0.5px; }
+        
         .close-modal { margin-top: 15px; background: #e2e8f0; color: #4a5568; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
         .result { margin-top: 24px; padding: 24px; border-radius: 12px; border: 4px solid; text-align: center; display: none; }
@@ -179,7 +182,7 @@
             <h2 style="margin-bottom: 10px;">Gratidão! ☕</h2>
             <p style="font-size: 14px;">Se essa ferramenta foi útil pra você, Contribua com R$ 1,00 (Um Real) para manter este projeto gratuito e atualizado.</p>
             <div class="pix-key" id="chavePix">88994014262</div>
-            <div class="favorecido-info">Favorecido: Zaqueu Fernandes Alves</div>
+            <div class="favorecido-info">Zaqueu Fernandes Alves</div>
             <button class="btn-primary" onclick="copiarChave()" style="height: 45px;">Copiar Chave PIX</button>
             <button class="close-modal" onclick="fecharModalPix()">Fechar</button>
         </div>
@@ -193,7 +196,7 @@
             'I': [{ faixaAte: 180000, aliquota: 4, deducao: 0 }, { faixaAte: 360000, aliquota: 7.3, deducao: 5940 }, { faixaAte: 720000, aliquota: 9.5, deducao: 13860 }, { faixaAte: 1800000, aliquota: 10.7, deducao: 22500 }, { faixaAte: 3600000, aliquota: 14.3, deducao: 87300 }, { faixaAte: 4800000, aliquota: 19, deducao: 378000 }],
             'II': [{ faixaAte: 180000, aliquota: 4.5, deducao: 0 }, { faixaAte: 360000, aliquota: 7.8, deducao: 5940 }, { faixaAte: 720000, aliquota: 10, deducao: 13860 }, { faixaAte: 1800000, aliquota: 11.2, deducao: 22500 }, { faixaAte: 3600000, aliquota: 14.7, deducao: 85500 }, { faixaAte: 4800000, aliquota: 30, deducao: 720000 }],
             'III': [{ faixaAte: 180000, aliquota: 6, deducao: 0 }, { faixaAte: 360000, aliquota: 11.2, deducao: 9360 }, { faixaAte: 720000, aliquota: 13.5, deducao: 17640 }, { faixaAte: 1800000, aliquota: 16, deducao: 35640 }, { faixaAte: 3600000, aliquota: 21, deducao: 125640 }, { faixaAte: 4800000, aliquota: 33, deducao: 648000 }],
-            'IV': [{ faixaAte: 180000, aliquota: 4.5, deducao: 0 }, { faixaAte: 360000, aliquota: 9, deducao: 8100 }, { faixaAte: 720000, aliquota: 10.2, deducao: 12420 }, { faixaAte: 1800000, aliquota: 14, deducao: 39780 }, { faixaAte: 3600000, aliquota: 22, deducao: 183780 }, { faixaAte: 4800000, aliquota: 33, deducao: 828000 }],
+            'IV': [{ faixaAte: 180000, aliquota: 4.5, deducao: 0 }, { faixaAte: 360000, aliquota: 9, deducao: 8100 }, { faixaAte: 720000, aliquota: 10.2, deducao: 12420 }, { faixaAte: 1800000, aliquota: 14, deducao: 39780 }, { faixaAte: 3600000, aliquota: 22, deducao: 183780 }, { faixaAte: 4800000, aliquota: 33, doc: 828000 }],
             'V': [{ faixaAte: 180000, aliquota: 15.5, deducao: 0 }, { faixaAte: 360000, aliquota: 18, deducao: 4500 }, { faixaAte: 720000, aliquota: 19.5, deducao: 9900 }, { faixaAte: 1800000, aliquota: 20.5, deducao: 17100 }, { faixaAte: 3600000, aliquota: 23, deducao: 62100 }, { faixaAte: 4800000, aliquota: 30.5, deducao: 540000 }]
         };
 
@@ -236,15 +239,11 @@
             const isChecked = document.getElementById(checkId).checked;
             const rawValue = input.value.replace(/[^\d]/g, '');
             const val = parseMoeda(input.value);
-
             if (!isChecked) { input.classList.remove('error'); err.classList.remove('show'); return true; }
             if (rawValue === "" || rawValue === "000") { input.classList.add('error'); err.textContent = "⚠️ Este campo não pode ser vazio"; err.classList.add('show'); return false; }
             if (val < 0) { input.classList.add('error'); err.textContent = "⚠️ O valor não pode ser menor que zero"; err.classList.add('show'); return false; }
             if (isProlabore && val < MIN_PROLABORE) { input.classList.add('error'); err.textContent = `⚠️ Mínimo legal: R$ 1.621,00 (Salário mínimo vigente 2026)`; err.classList.add('show'); return false; }
-
-            input.classList.remove('error');
-            err.classList.remove('show');
-            return true;
+            input.classList.remove('error'); err.classList.remove('show'); return true;
         }
 
         document.getElementById('anexo').addEventListener('change', function() {
@@ -280,30 +279,21 @@
         document.getElementById('dasForm').onsubmit = function(e) {
             e.preventDefault();
             if(!validarCampoFatorR('valorProlabore', 'errorProlabore', 'temProlabore', true) || !validarCampoFatorR('valorFolha', 'errorFolha', 'temFolha', false)) return;
-
             let anexoReal = document.getElementById('anexo').value;
             const rbt12 = parseMoeda(document.getElementById('rbt12').value);
             const fatMes = parseMoeda(document.getElementById('faturamentoMes').value);
             const vProlabore = parseMoeda(document.getElementById('valorProlabore').value);
             const vFolha = parseMoeda(document.getElementById('valorFolha').value);
             let descFatorR = "";
-
             if (anexoReal === 'FATOR_R') {
                 const ratio = (vProlabore + vFolha) / rbt12;
                 anexoReal = (ratio >= 0.28) ? 'III' : 'V';
                 descFatorR = `Fator R: ${(ratio * 100).toFixed(2)}% -> Anexo ${anexoReal}`;
             }
-
             const faixa = tabelasSimples[anexoReal].find(f => rbt12 <= f.faixaAte);
             const aliqEf = ((rbt12 * (faixa.aliquota / 100)) - faixa.deducao) / rbt12 * 100;
             const vDas = fatMes * (aliqEf / 100);
-
-            calculoAtual = { 
-                empresa: document.getElementById('empresa').value || 'Não Informada', 
-                responsavel: document.getElementById('responsavel').value || 'Não Informado',
-                anexo: anexoReal, fatMes, rbt12, vProlabore, vFolha, aliqEf, vDas, descFatorR 
-            };
-            
+            calculoAtual = { empresa: document.getElementById('empresa').value || 'Não Informada', responsavel: document.getElementById('responsavel').value || 'Não Informado', anexo: anexoReal, fatMes, rbt12, vProlabore, vFolha, aliqEf, vDas, descFatorR };
             document.getElementById('infoFatorR').textContent = descFatorR;
             document.getElementById('valorDas').textContent = formatarMoeda(vDas);
             document.getElementById('aliquotaNominal').textContent = faixa.aliquota + '%';
@@ -319,31 +309,15 @@
         function copiarChave() {
             const chave = document.getElementById('chavePix').textContent;
             if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(chave).then(() => {
-                    alert('Chave PIX copiada com sucesso! 🎉');
-                }).catch(err => {
-                    fallbackCopiarTexto(chave);
-                });
-            } else {
-                fallbackCopiarTexto(chave);
-            }
+                navigator.clipboard.writeText(chave).then(() => alert('Chave PIX copiada! 🎉')).catch(() => fallbackCopiarTexto(chave));
+            } else { fallbackCopiarTexto(chave); }
         }
 
         function fallbackCopiarTexto(texto) {
             const textArea = document.createElement("textarea");
-            textArea.value = texto;
-            textArea.style.position = "fixed";
-            textArea.style.left = "-9999px";
-            textArea.style.top = "0";
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            try {
-                document.execCommand('copy');
-                alert('Chave PIX copiada com sucesso! 🎉');
-            } catch (err) {
-                alert('Erro ao copiar. Por favor, selecione e copie manualmente.');
-            }
+            textArea.value = texto; textArea.style.position = "fixed"; textArea.style.left = "-9999px";
+            document.body.appendChild(textArea); textArea.focus(); textArea.select();
+            try { document.execCommand('copy'); alert('Chave PIX copiada! 🎉'); } catch { alert('Erro ao copiar.'); }
             document.body.removeChild(textArea);
         }
 
@@ -356,12 +330,9 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const dataHora = new Date().toLocaleString('pt-BR');
-
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(16);
             doc.text('Cálculo DAS Simples Nacional', 105, 20, { align: 'center' });
             doc.line(20, 25, 190, 25);
-
             doc.setFontSize(11);
             let y = 35;
             const printLine = (label, value) => {
@@ -369,35 +340,22 @@
                 doc.setFont('helvetica', 'normal'); doc.text(String(value), 95, y);
                 y += 8;
             };
-
-            printLine('Empresa:', calculoAtual.empresa);
-            printLine('Responsável pelo Cálculo:', calculoAtual.responsavel);
-            printLine('Anexo:', calculoAtual.anexo);
+            printLine('Empresa:', calculoAtual.empresa); printLine('Responsável pelo Cálculo:', calculoAtual.responsavel); printLine('Anexo:', calculoAtual.anexo);
             if(calculoAtual.descFatorR) { doc.setTextColor(66, 153, 225); printLine('Fator R:', calculoAtual.descFatorR); doc.setTextColor(0, 0, 0); }
-            printLine('Soma Pró-labore (12 meses):', formatarMoeda(calculoAtual.vProlabore));
-            printLine('Soma Salários/FGTS (12 meses):', formatarMoeda(calculoAtual.vFolha));
-            printLine('Faturamento bruto (RBT12):', formatarMoeda(calculoAtual.rbt12));
-            printLine('Faturamento Mês:', formatarMoeda(calculoAtual.fatMes));
+            printLine('Soma Pró-labore (12 meses):', formatarMoeda(calculoAtual.vProlabore)); printLine('Soma Salários/FGTS (12 meses):', formatarMoeda(calculoAtual.vFolha));
+            printLine('Faturamento bruto (RBT12):', formatarMoeda(calculoAtual.rbt12)); printLine('Faturamento Mês:', formatarMoeda(calculoAtual.fatMes));
             printLine('Alíquota Efetiva:', calculoAtual.aliqEf.toFixed(2) + '%');
-
-            y += 5;
-            doc.setFillColor(245, 245, 245); doc.rect(20, y-5, 170, 15, 'F');
+            y += 5; doc.setFillColor(245, 245, 245); doc.rect(20, y-5, 170, 15, 'F');
             doc.setFontSize(14); doc.setFont('helvetica', 'bold');
             doc.text('VALOR DAS:', 25, y+5); doc.text(formatarMoeda(calculoAtual.vDas), 95, y+5);
-
-            // Gratidão no PDF com Favorecido Centralizado
-            y += 25;
-            doc.setFontSize(9); doc.setFont('helvetica', 'italic'); doc.setTextColor(100);
-            doc.text('Se essa ferramenta foi útil pra você, apoie com R$ 1,00 (Um Real) para manter este projeto gratuito e atualizado.', 105, y, {align: 'center'});
+            y += 25; doc.setFontSize(9); doc.setFont('helvetica', 'italic'); doc.setTextColor(100);
+            doc.text('Se essa ferramenta foi útil pra você, apoie com R$ 1,00 (Um Real) para manter este projeto gratuito.', 105, y, {align: 'center'});
             doc.text(`Chave PIX: ${document.getElementById('chavePix').textContent}`, 105, y+5, {align: 'center'});
-            doc.text(`Favorecido: ${FAVORECIDO_NOME}`, 105, y+10, {align: 'center'});
-
-            doc.setLineWidth(0.1); doc.line(20, 275, 190, 275);
-            doc.setFont('helvetica', 'normal');
+            doc.text(FAVORECIDO_NOME, 105, y+10, {align: 'center'});
+            doc.setLineWidth(0.1); doc.line(20, 275, 190, 275); doc.setFont('helvetica', 'normal');
             doc.text('© Copyright 2026: Zaqueu Fernandes (88)9.9401-4262', 105, 282, { align: 'center' });
             doc.setFontSize(7); doc.text(`Gerado em: ${dataHora}`, 190, 282, { align: 'right' });
-
-            doc.save(`DAS_${calculoAtual.empresa.replace(/\s+/g, '_')}.pdf`);
+            doc.save(`Cálculo DAS_${calculoAtual.empresa.replace(/\s+/g, '_')}.pdf`);
         };
     </script>
 </body>
