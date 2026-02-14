@@ -102,13 +102,14 @@
 
                     <div id="blocoFatorR" style="display: none; background: rgba(66, 153, 225, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #4299e1;">
                         <p style="font-size: 13px; margin-bottom: 15px; font-weight: bold; color: #4299e1;">🔍 Verificação de Gasto com Pessoal (Fator R)</p>
+                        
                         <label class="checkbox-group">
                             <input type="checkbox" id="temProlabore"> Tem Pró-labore?
                         </label>
                         <div id="fieldProlabore" class="hidden-field">
                             <label>Soma Pró-labore (últimos 12 meses)</label>
                             <input type="text" id="valorProlabore" placeholder="R$ 0,00">
-                            <div class="error-msg" id="errorMinProlabore">⚠️ Mínimo legal: R$ 1.621,00 (Salário-Mínimo 2026)</div>
+                            <div class="error-msg" id="errorProlabore"></div>
                         </div>
 
                         <label class="checkbox-group" style="margin-top: 10px;">
@@ -117,6 +118,7 @@
                         <div id="fieldFolha" class="hidden-field">
                             <label>Soma Salários/FGTS (últimos 12 meses)</label>
                             <input type="text" id="valorFolha" placeholder="R$ 0,00">
+                            <div class="error-msg" id="errorFolha"></div>
                         </div>
                     </div>
 
@@ -174,26 +176,67 @@
             i.value = 'R$ ' + v.replace('.', ',').replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
         }
 
+        function ocultarResultados() {
+            document.getElementById('resultado').classList.remove('show');
+            document.getElementById('btnPdf').classList.remove('show');
+            calculoAtual = null;
+        }
+
+        // Monitoramento Global de Alterações
+        const camposSensiveis = ['anexo', 'rbt12', 'faturamentoMes', 'valorProlabore', 'valorFolha', 'temProlabore', 'temFolha'];
+        camposSensiveis.forEach(id => {
+            const el = document.getElementById(id);
+            el.addEventListener('input', ocultarResultados);
+            el.addEventListener('change', ocultarResultados);
+        });
+
         document.querySelectorAll('input[placeholder*="R$"]').forEach(input => {
             input.addEventListener('input', () => { 
                 aplicarMascara(input); 
-                if(input.id === 'valorProlabore') validarProlabore(input);
+                if(input.id === 'valorProlabore') validarCampoFatorR('valorProlabore', 'errorProlabore', 'temProlabore', true);
+                if(input.id === 'valorFolha') validarCampoFatorR('valorFolha', 'errorFolha', 'temFolha', false);
                 calcularPrevia(); 
             });
         });
 
-        function validarProlabore(input) {
+        // Validação Inteligente Pró-labore e Folha
+        function validarCampoFatorR(inputId, errorId, checkId, isProlabore) {
+            const input = document.getElementById(inputId);
+            const err = document.getElementById(errorId);
+            const isChecked = document.getElementById(checkId).checked;
+            const rawValue = input.value.replace(/[^\d]/g, ''); // Remove máscara
             const val = parseMoeda(input.value);
-            const err = document.getElementById('errorMinProlabore');
-            if (document.getElementById('temProlabore').checked && val > 0 && val < MIN_PROLABORE) {
-                input.classList.add('error');
-                err.classList.add('show');
-                return false;
-            } else {
+
+            if (!isChecked) {
                 input.classList.remove('error');
                 err.classList.remove('show');
                 return true;
             }
+
+            if (rawValue === "" || rawValue === "000") {
+                input.classList.add('error');
+                err.textContent = "⚠️ Este campo não pode ser vazio";
+                err.classList.add('show');
+                return false;
+            }
+
+            if (val < 0) {
+                input.classList.add('error');
+                err.textContent = "⚠️ O valor para este campo não pode ser menor que zero";
+                err.classList.add('show');
+                return false;
+            }
+
+            if (isProlabore && val < MIN_PROLABORE) {
+                input.classList.add('error');
+                err.textContent = `⚠️ Mínimo legal: R$ 1.621,00 (Salário-Mínimo 2026)`;
+                err.classList.add('show');
+                return false;
+            }
+
+            input.classList.remove('error');
+            err.classList.remove('show');
+            return true;
         }
 
         const selectAnexo = document.getElementById('anexo');
@@ -205,8 +248,14 @@
 
         document.getElementById('temProlabore').onclick = function() { 
             document.getElementById('fieldProlabore').classList.toggle('show', this.checked);
+            ocultarResultados();
+            validarCampoFatorR('valorProlabore', 'errorProlabore', 'temProlabore', true);
         };
-        document.getElementById('temFolha').onclick = function() { document.getElementById('fieldFolha').classList.toggle('show', this.checked); };
+        document.getElementById('temFolha').onclick = function() { 
+            document.getElementById('fieldFolha').classList.toggle('show', this.checked);
+            ocultarResultados();
+            validarCampoFatorR('valorFolha', 'errorFolha', 'temFolha', false);
+        };
 
         function calcularPrevia() {
             let anexo = selectAnexo.value;
@@ -224,8 +273,14 @@
 
         document.getElementById('dasForm').onsubmit = function(e) {
             e.preventDefault();
-            if(document.getElementById('temProlabore').checked && !validarProlabore(document.getElementById('valorProlabore'))) {
-                alert('Pró-labore abaixo do mínimo legal.'); return;
+            
+            // Verificação de Erros no Fator R antes de prosseguir
+            const v1 = validarCampoFatorR('valorProlabore', 'errorProlabore', 'temProlabore', true);
+            const v2 = validarCampoFatorR('valorFolha', 'errorFolha', 'temFolha', false);
+            
+            if(!v1 || !v2) {
+                alert('Por favor, corrija os valores da seção Fator R antes de calcular.');
+                return;
             }
 
             let anexoReal = selectAnexo.value;
@@ -270,22 +325,20 @@
             const doc = new jsPDF();
             const dataHora = new Date().toLocaleString('pt-BR');
 
-            // Topo
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(16);
             doc.text('Cálculo DAS Simples Nacional', 105, 20, { align: 'center' });
             doc.setLineWidth(0.2);
             doc.line(20, 25, 190, 25);
 
-            // Corpo - Informações à esquerda
             doc.setFontSize(11);
             let y = 35;
             const spacing = 8;
 
-            const printLine = (label, value, boldValue = false) => {
+            const printLine = (label, value) => {
                 doc.setFont('helvetica', 'bold');
                 doc.text(label, 20, y);
-                doc.setFont('helvetica', boldValue ? 'bold' : 'normal');
+                doc.setFont('helvetica', 'normal');
                 doc.text(String(value), 95, y);
                 y += spacing;
             };
@@ -306,7 +359,6 @@
             printLine('Faturamento Mês:', formatarMoeda(calculoAtual.fatMes));
             printLine('Alíquota Efetiva:', calculoAtual.aliqEf.toFixed(2) + '%');
 
-            // Destaque do Valor DAS
             y += 5;
             doc.setFillColor(245, 245, 245);
             doc.rect(20, y-5, 170, 15, 'F');
@@ -315,62 +367,17 @@
             doc.text('VALOR DAS:', 25, y+5);
             doc.text(formatarMoeda(calculoAtual.vDas), 95, y+5);
 
-            // Rodapé Centralizado
             doc.setFontSize(9);
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(100);
             doc.setLineWidth(0.1);
-            doc.line(20, 275, 190, 275); // Linha de destaque do rodapé
-            
-            // Centralizando o texto de Copyright
+            doc.line(20, 275, 190, 275);
             doc.text('© Copyright 2026: Zaqueu Fernandes (88)9.9401-4262', 105, 282, { align: 'center' });
-            
-            // Data/Hora discreta à direita
             doc.setFontSize(7);
             doc.text(`Gerado em: ${dataHora}`, 190, 282, { align: 'right' });
 
             doc.save(`DAS_${calculoAtual.empresa.replace(/\s+/g, '_')}.pdf`);
         };
-// ... (Mantenha as tabelasSimples e funções de parse/formatar acima)
-
-        // Função para ocultar resultados ao alterar campos
-        function ocultarResultados() {
-            document.getElementById('resultado').classList.remove('show');
-            document.getElementById('btnPdf').classList.remove('show');
-            calculoAtual = null; // Reseta o cálculo guardado
-        }
-
-        // Monitorar mudanças nos campos sensíveis
-        const camposSensiveis = [
-            'anexo', 'temProlabore', 'valorProlabore', 
-            'temFolha', 'valorFolha', 'rbt12', 'faturamentoMes'
-        ];
-
-        camposSensiveis.forEach(id => {
-            const el = document.getElementById(id);
-            // 'input' serve para campos de texto/moeda, 'change' para select e checkboxes
-            el.addEventListener('input', ocultarResultados);
-            el.addEventListener('change', ocultarResultados);
-        });
-
-        // Ajuste no botão Tem Pró-labore para garantir que o clique oculte o resultado
-        document.getElementById('temProlabore').onclick = function() { 
-            const field = document.getElementById('fieldProlabore');
-            field.classList.toggle('show', this.checked);
-            ocultarResultados();
-            if(!this.checked) {
-                document.getElementById('valorProlabore').classList.remove('error');
-                document.getElementById('errorMinProlabore').classList.remove('show');
-            }
-        };
-
-        // Ajuste no botão Tem Folha
-        document.getElementById('temFolha').onclick = function() { 
-            document.getElementById('fieldFolha').classList.toggle('show', this.checked);
-            ocultarResultados();
-        };
-
-        // ... (Mantenha o restante da lógica de Cálculo e PDF que já fizemos)
     </script>
 </body>
 </html>
