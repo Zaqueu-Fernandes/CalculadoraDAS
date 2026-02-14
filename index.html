@@ -221,6 +221,30 @@
             display: block;
         }
 
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+
+        .checkbox-group input {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .hidden-field {
+            display: none;
+            margin-top: 10px;
+            padding-left: 30px;
+        }
+
+        .hidden-field.show {
+            display: block;
+        }
+
         .btn {
             width: 100%;
             height: 56px;
@@ -362,7 +386,6 @@
 <body class="dark">
     <div class="container">
         <div class="card">
-            <!-- Header -->
             <div class="header">
                 <div class="header-top">
                     <h1>📊 Calculadora DAS Simples Nacional</h1>
@@ -375,36 +398,50 @@
                 <p class="subtitle">Calcule o DAS conforme LC 123/2006 - Tabela 2026</p>
             </div>
 
-            <!-- Body -->
             <div class="body">
                 <form id="dasForm">
-                    <!-- Campo 1 -->
                     <div class="form-group">
                         <label for="empresa">1. Nome da Empresa <span class="optional">(opcional)</span></label>
                         <input type="text" id="empresa" placeholder="Digite o nome da empresa...">
                     </div>
 
-                    <!-- Campo 2 -->
                     <div class="form-group">
-                        <label for="Responsável pelo Cálculo">2. Responsável pelo Cálculo <span class="optional">(opcional)</span></label>
+                        <label for="responsavel">2. Responsável pelo Cálculo <span class="optional">(opcional)</span></label>
                         <input type="text" id="responsavel" placeholder="Digite o nome do responsável...">
                     </div>
 
-                    <!-- Campo 3 -->
                     <div class="form-group">
                         <label for="anexo">3. Anexo do Simples Nacional <span class="required">*</span></label>
                         <select id="anexo">
                             <option value="">Escolha o Anexo</option>
-                            <option value="I">Anexo I</option>
-                            <option value="II">Anexo II</option>
-                            <option value="III">Anexo III</option>
-                            <option value="IV">Anexo IV</option>
-                            <option value="V">Anexo V</option>
+                            <option value="I">Anexo I - Comércio</option>
+                            <option value="II">Anexo II - Indústria</option>
+                            <option value="III">Anexo III - Serviços</option>
+                            <option value="IV">Anexo IV - Serviços (INSS Patronal fora)</option>
+                            <option value="V">Anexo V - Serviços (Fator R)</option>
+                            <option value="FATOR_R">Serviços Sujeitos ao Fator R (III ou V)</option>
                         </select>
                         <div class="error-msg" id="errorAnexo">⚠️ Selecione o Anexo corretamente</div>
                     </div>
 
-                    <!-- Campo 4 -->
+                    <div id="blocoFatorR" style="display: none; background: rgba(66, 153, 225, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #4299e1;">
+                        <label class="checkbox-group">
+                            <input type="checkbox" id="temProlabore"> Tem Pró-labore?
+                        </label>
+                        <div id="fieldProlabore" class="hidden-field">
+                            <label>Valor acumulado Pró-labore (12m)</label>
+                            <input type="text" id="valorProlabore" class="money-input" placeholder="R$ 0,00">
+                        </div>
+
+                        <label class="checkbox-group" style="margin-top: 10px;">
+                            <input type="checkbox" id="temFolha"> Tem Folha de Pagamento?
+                        </label>
+                        <div id="fieldFolha" class="hidden-field">
+                            <label>Valor acumulado Folha (12m)</label>
+                            <input type="text" id="valorFolha" class="money-input" placeholder="R$ 0,00">
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label for="rbt12">4. Faturamento bruto acumulado dos últimos 12 meses (RBT12) <span class="required">*</span></label>
                         <input type="text" id="rbt12" placeholder="Preencha esse campo...">
@@ -412,7 +449,6 @@
                         <div class="preview" id="previewRbt12"></div>
                     </div>
 
-                    <!-- Campo 5 -->
                     <div class="form-group">
                         <label for="faturamentoMes">5. Faturamento do mês atual <span class="required">*</span></label>
                         <input type="text" id="faturamentoMes" placeholder="Preencha esse campo...">
@@ -420,19 +456,17 @@
                         <div class="preview" id="previewFaturamentoMes"></div>
                     </div>
 
-                    <!-- Botão Gerar DAS -->
                     <button type="submit" class="btn btn-primary">
                         📟 Calcular DAS
                     </button>
 
-                    <!-- Botão Exportar PDF -->
                     <button type="button" class="btn btn-success" id="btnPdf">
-                        📥 Gear PDF
+                        📥 Gerar PDF
                     </button>
                 </form>
 
-                <!-- Resultado -->
                 <div class="result" id="resultado">
+                    <div id="infoFatorR" style="font-size: 12px; margin-bottom: 10px; color: #4299e1; font-weight: bold;"></div>
                     <div class="result-label">DAS desse Mês</div>
                     <div class="result-value" id="valorDas">R$ 0,00</div>
                     <div class="result-details">
@@ -448,7 +482,6 @@
                 </div>
             </div>
 
-            <!-- Footer -->
             <div class="footer">
                © Copyright 2026: Zaqueu Fernandes (88)9.9401-4262
             </div>
@@ -522,6 +555,31 @@
             }
         });
 
+        // Lógica Fator R - Exibição de campos
+        const selectAnexo = document.getElementById('anexo');
+        const blocoFatorR = document.getElementById('blocoFatorR');
+        const checkProlabore = document.getElementById('temProlabore');
+        const checkFolha = document.getElementById('temFolha');
+        const fieldProlabore = document.getElementById('fieldProlabore');
+        const fieldFolha = document.getElementById('fieldFolha');
+
+        selectAnexo.addEventListener('change', function() {
+            if (this.value === 'FATOR_R') {
+                blocoFatorR.style.display = 'block';
+            } else {
+                blocoFatorR.style.display = 'none';
+            }
+            calcularPrevia();
+        });
+
+        checkProlabore.addEventListener('change', function() {
+            fieldProlabore.classList.toggle('show', this.checked);
+        });
+
+        checkFolha.addEventListener('change', function() {
+            fieldFolha.classList.toggle('show', this.checked);
+        });
+
         // Formatação de moeda
         function formatarMoeda(valor) {
             return new Intl.NumberFormat('pt-BR', {
@@ -531,6 +589,7 @@
         }
 
         function parseMoeda(valor) {
+            if(!valor) return 0;
             return parseFloat(valor.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
         }
 
@@ -540,40 +599,42 @@
             input.value = 'R$ ' + valor.replace('.', ',').replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
         }
 
-        // Aplicar máscara aos campos de valor
-        document.getElementById('rbt12').addEventListener('input', function() {
-            aplicarMascaraMoeda(this);
-            calcularPrevia();
-        });
-
-        document.getElementById('faturamentoMes').addEventListener('input', function() {
-            aplicarMascaraMoeda(this);
-            calcularPrevia();
-        });
-
-        // Atualizar prévia quando anexo mudar
-        document.getElementById('anexo').addEventListener('change', function() {
-            if (anexoAnterior && anexoAnterior !== this.value && calculoAtual) {
-                alert('Você mudou o Anexo, Clique novamente em Calcular DAS para atualizar o cálculo.');
-            }
-            anexoAnterior = this.value;
-            calcularPrevia();
+        // Aplicar máscara aos campos
+        document.querySelectorAll('input[placeholder*="R$"], #rbt12, #faturamentoMes').forEach(input => {
+            input.addEventListener('input', function() {
+                aplicarMascaraMoeda(this);
+                calcularPrevia();
+            });
         });
 
         // Calcular prévia
         function calcularPrevia() {
-            const anexo = document.getElementById('anexo').value;
+            let anexo = document.getElementById('anexo').value;
             const rbt12 = parseMoeda(document.getElementById('rbt12').value);
             const faturamentoMes = parseMoeda(document.getElementById('faturamentoMes').value);
 
             const previewRbt12 = document.getElementById('previewRbt12');
             const previewFaturamentoMes = document.getElementById('previewFaturamentoMes');
 
+            // Se for Fator R, decidir qual anexo mostrar na prévia
+            if (anexo === 'FATOR_R') {
+                const folha = parseMoeda(document.getElementById('valorFolha').value);
+                const prolabore = parseMoeda(document.getElementById('valorProlabore').value);
+                const totalFolha = folha + prolabore;
+                
+                if (rbt12 > 0) {
+                    const fatorRValue = totalFolha / rbt12;
+                    anexo = (fatorRValue >= 0.28) ? 'III' : 'V';
+                } else {
+                    anexo = null;
+                }
+            }
+
             if (anexo && rbt12 > 0) {
                 const faixa = encontrarFaixa(anexo, rbt12);
                 if (faixa) {
                     previewRbt12.innerHTML = `
-                        📊 Prévia automática:<br>
+                        📊 Prévia automática (Anexo ${anexo}):<br>
                         • Alíquota Nominal: ${faixa.aliquota.toFixed(2)}%<br>
                         • Parcela a Deduzir: ${formatarMoeda(faixa.deducao)}
                     `;
@@ -592,94 +653,61 @@
             }
         }
 
-        // Encontrar faixa
         function encontrarFaixa(anexo, rbt12) {
             const tabela = tabelasSimples[anexo];
             if (!tabela) return null;
-            
             for (let faixa of tabela) {
-                if (rbt12 <= faixa.faixaAte) {
-                    return faixa;
-                }
+                if (rbt12 <= faixa.faixaAte) return faixa;
             }
             return null;
         }
 
-        // Calcular alíquota efetiva
         function calcularAliquotaEfetiva(anexo, rbt12) {
             const faixa = encontrarFaixa(anexo, rbt12);
-            if (!faixa) return 0;
-            
+            if (!faixa || rbt12 === 0) return 0;
             const aliquotaEfetiva = ((rbt12 * (faixa.aliquota / 100)) - faixa.deducao) / rbt12 * 100;
             return Math.max(0, aliquotaEfetiva);
-        }
-
-        // Validar formulário
-        function validarFormulario() {
-            let valido = true;
-
-            const anexo = document.getElementById('anexo');
-            const rbt12 = document.getElementById('rbt12');
-            const faturamentoMes = document.getElementById('faturamentoMes');
-
-            // Validar anexo
-            if (!anexo.value) {
-                anexo.classList.add('error');
-                document.getElementById('errorAnexo').classList.add('show');
-                valido = false;
-            } else {
-                anexo.classList.remove('error');
-                document.getElementById('errorAnexo').classList.remove('show');
-            }
-
-            // Validar RBT12
-            if (parseMoeda(rbt12.value) <= 0) {
-                rbt12.classList.add('error');
-                document.getElementById('errorRbt12').classList.add('show');
-                valido = false;
-            } else {
-                rbt12.classList.remove('error');
-                document.getElementById('errorRbt12').classList.remove('show');
-            }
-
-            // Validar faturamento mês
-            if (parseMoeda(faturamentoMes.value) <= 0) {
-                faturamentoMes.classList.add('error');
-                document.getElementById('errorFaturamentoMes').classList.add('show');
-                valido = false;
-            } else {
-                faturamentoMes.classList.remove('error');
-                document.getElementById('errorFaturamentoMes').classList.remove('show');
-            }
-
-            return valido;
         }
 
         // Calcular DAS
         document.getElementById('dasForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
-            if (!validarFormulario()) {
-                return;
-            }
-
-            const anexo = document.getElementById('anexo').value;
+            let selectedAnexo = document.getElementById('anexo').value;
             const rbt12 = parseMoeda(document.getElementById('rbt12').value);
             const faturamentoMes = parseMoeda(document.getElementById('faturamentoMes').value);
 
-            const faixa = encontrarFaixa(anexo, rbt12);
-            if (!faixa) {
-                alert('Erro ao calcular. Verifique os valores informados.');
+            if (!selectedAnexo || rbt12 <= 0 || faturamentoMes <= 0) {
+                alert('Preencha todos os campos obrigatórios.');
                 return;
             }
 
-            const aliquotaEfetiva = calcularAliquotaEfetiva(anexo, rbt12);
+            let textoFatorR = "";
+            // Lógica Final do Fator R
+            if (selectedAnexo === 'FATOR_R') {
+                const folha = parseMoeda(document.getElementById('valorFolha').value);
+                const prolabore = parseMoeda(document.getElementById('valorProlabore').value);
+                const totalFolha = folha + prolabore;
+                const ratio = totalFolha / rbt12;
+                
+                if (ratio >= 0.28) {
+                    selectedAnexo = 'III';
+                    textoFatorR = `Fator R: ${(ratio * 100).toFixed(2)}% (>= 28%). Enquadrado no ANEXO III`;
+                } else {
+                    selectedAnexo = 'V';
+                    textoFatorR = `Fator R: ${(ratio * 100).toFixed(2)}% (< 28%). Enquadrado no ANEXO V`;
+                }
+            }
+
+            const faixa = encontrarFaixa(selectedAnexo, rbt12);
+            const aliquotaEfetiva = calcularAliquotaEfetiva(selectedAnexo, rbt12);
             const valorDas = faturamentoMes * (aliquotaEfetiva / 100);
 
             calculoAtual = {
                 empresa: document.getElementById('empresa').value || 'Não informado',
                 responsavel: document.getElementById('responsavel').value || 'Não informado',
-                anexo: 'Anexo ' + anexo,
+                anexo: 'Anexo ' + selectedAnexo,
+                fatorRInfo: textoFatorR,
                 rbt12: rbt12,
                 faturamentoMes: faturamentoMes,
                 aliquotaNominal: faixa.aliquota,
@@ -688,6 +716,7 @@
                 valorDas: valorDas
             };
 
+            document.getElementById('infoFatorR').textContent = textoFatorR;
             document.getElementById('valorDas').textContent = formatarMoeda(valorDas);
             document.getElementById('aliquotaNominal').textContent = faixa.aliquota.toFixed(2) + '%';
             document.getElementById('aliquotaEfetiva').textContent = aliquotaEfetiva.toFixed(2) + '%';
@@ -698,27 +727,24 @@
         // Exportar PDF
         document.getElementById('btnPdf').addEventListener('click', function() {
             if (!calculoAtual) return;
-
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
-            // Cabeçalho
             doc.setFontSize(18);
             doc.setFont('helvetica', 'bold');
             doc.text('Cálculo DAS Simples Nacional', 105, 20, { align: 'center' });
             doc.setLineWidth(0.5);
             doc.line(20, 25, 190, 25);
 
-            // Corpo
             doc.setFontSize(12);
-            doc.setFont('helvetica', 'normal');
             let y = 40;
 
             const dados = [
                 ['Nome da empresa:', calculoAtual.empresa],
                 ['Responsável pelo cálculo:', calculoAtual.responsavel],
-                ['Anexo:', calculoAtual.anexo],
-                ['(RBT12):Receita 12 meses', formatarMoeda(calculoAtual.rbt12)],
+                ['Anexo Utilizado:', calculoAtual.anexo],
+                ['Observação:', calculoAtual.fatorRInfo || 'N/A'],
+                ['RBT12 (12 meses):', formatarMoeda(calculoAtual.rbt12)],
                 ['Faturamento do mês:', formatarMoeda(calculoAtual.faturamentoMes)],
                 ['Alíquota Nominal:', calculoAtual.aliquotaNominal.toFixed(2) + '%'],
                 ['Parcela a Deduzir:', formatarMoeda(calculoAtual.parcelaDeducao)],
@@ -733,33 +759,28 @@
                 y += 10;
             });
 
-            // Valor do DAS
             y += 10;
             doc.setFillColor(240, 240, 240);
             doc.rect(20, y - 5, 170, 20, 'F');
             doc.setFont('helvetica', 'bold');
-            doc.setFontSize(14);
             doc.text('Valor do DAS:', 25, y + 5);
             doc.setTextColor(72, 187, 120);
             doc.setFontSize(18);
             doc.text(formatarMoeda(calculoAtual.valorDas), 25, y + 13);
+            
             doc.setTextColor(0, 0, 0);
-
-            // Rodapé
             doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
             doc.line(20, 270, 190, 270);
             doc.text('© Copyright 2026: Zaqueu Fernandes (88)9.9401-4262', 105, 280, { align: 'center' });
 
             doc.save('DAS-Simples-Nacional.pdf');
         });
 
-        // PWA Service Worker
+        // Service Worker (PWA)
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('data:text/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdpbnN0YWxsJywgZnVuY3Rpb24oZSkge2Uud2FpdFVudGlsKHNlbGYuc2tpcFdhaXRpbmcoKSl9KTtzZWxmLmFkZEV2ZW50TGlzdGVuZXIoJ2ZldGNoJyxmdW5jdGlvbihlKXtlfSk7')
                 .catch(function(err) { console.log('SW registration failed'); });
         }
     </script>
 </body>
-
 </html>
