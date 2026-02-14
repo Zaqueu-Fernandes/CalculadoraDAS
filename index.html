@@ -331,6 +331,46 @@
 
             doc.save(`DAS_${calculoAtual.empresa.replace(/\s+/g, '_')}.pdf`);
         };
+// ... (Mantenha as tabelasSimples e funções de parse/formatar acima)
+
+        // Função para ocultar resultados ao alterar campos
+        function ocultarResultados() {
+            document.getElementById('resultado').classList.remove('show');
+            document.getElementById('btnPdf').classList.remove('show');
+            calculoAtual = null; // Reseta o cálculo guardado
+        }
+
+        // Monitorar mudanças nos campos sensíveis
+        const camposSensiveis = [
+            'anexo', 'temProlabore', 'valorProlabore', 
+            'temFolha', 'valorFolha', 'rbt12', 'faturamentoMes'
+        ];
+
+        camposSensiveis.forEach(id => {
+            const el = document.getElementById(id);
+            // 'input' serve para campos de texto/moeda, 'change' para select e checkboxes
+            el.addEventListener('input', ocultarResultados);
+            el.addEventListener('change', ocultarResultados);
+        });
+
+        // Ajuste no botão Tem Pró-labore para garantir que o clique oculte o resultado
+        document.getElementById('temProlabore').onclick = function() { 
+            const field = document.getElementById('fieldProlabore');
+            field.classList.toggle('show', this.checked);
+            ocultarResultados();
+            if(!this.checked) {
+                document.getElementById('valorProlabore').classList.remove('error');
+                document.getElementById('errorMinProlabore').classList.remove('show');
+            }
+        };
+
+        // Ajuste no botão Tem Folha
+        document.getElementById('temFolha').onclick = function() { 
+            document.getElementById('fieldFolha').classList.toggle('show', this.checked);
+            ocultarResultados();
+        };
+
+        // ... (Mantenha o restante da lógica de Cálculo e PDF que já fizemos)
     </script>
 </body>
 </html>
