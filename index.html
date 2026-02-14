@@ -315,14 +315,19 @@
             doc.text('VALOR DAS:', 25, y+5);
             doc.text(formatarMoeda(calculoAtual.vDas), 95, y+5);
 
-            // Rodapé
+            // Rodapé Centralizado
             doc.setFontSize(9);
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(100);
             doc.setLineWidth(0.1);
-            doc.line(20, 275, 190, 275);
-            doc.text(`Gerado em: ${dataHora}`, 20, 282);
+            doc.line(20, 275, 190, 275); // Linha de destaque do rodapé
+            
+            // Centralizando o texto de Copyright
             doc.text('© Copyright 2026: Zaqueu Fernandes (88)9.9401-4262', 105, 282, { align: 'center' });
+            
+            // Data/Hora discreta à direita
+            doc.setFontSize(7);
+            doc.text(`Gerado em: ${dataHora}`, 190, 282, { align: 'right' });
 
             doc.save(`DAS_${calculoAtual.empresa.replace(/\s+/g, '_')}.pdf`);
         };
