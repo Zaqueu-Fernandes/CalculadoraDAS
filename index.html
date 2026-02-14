@@ -61,7 +61,8 @@
         /* Modal */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; }
         .modal-content { background: white; padding: 30px; border-radius: 16px; max-width: 400px; width: 90%; text-align: center; color: #2d3748; }
-        .pix-key { background: #f7fafc; padding: 12px; border-radius: 8px; border: 2px dashed #cbd5e0; font-family: monospace; margin: 15px 0; font-weight: bold; font-size: 14px; word-break: break-all; }
+        .pix-key { background: #f7fafc; padding: 12px; border-radius: 8px; border: 2px dashed #cbd5e0; font-family: monospace; margin: 15px 0 5px 0; font-weight: bold; font-size: 14px; word-break: break-all; }
+        .favorecido-info { font-size: 12px; color: #718096; margin-bottom: 15px; font-weight: 500; }
         .close-modal { margin-top: 15px; background: #e2e8f0; color: #4a5568; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
         .result { margin-top: 24px; padding: 24px; border-radius: 12px; border: 4px solid; text-align: center; display: none; }
@@ -178,6 +179,7 @@
             <h2 style="margin-bottom: 10px;">Gratidão! ☕</h2>
             <p style="font-size: 14px;">Se essa ferramenta foi útil pra você, Contribua com R$ 1,00 (Um Real) para manter este projeto gratuito e atualizado.</p>
             <div class="pix-key" id="chavePix">88994014262</div>
+            <div class="favorecido-info">Favorecido: Zaqueu Fernandes Alves</div>
             <button class="btn-primary" onclick="copiarChave()" style="height: 45px;">Copiar Chave PIX</button>
             <button class="close-modal" onclick="fecharModalPix()">Fechar</button>
         </div>
@@ -186,6 +188,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
         const MIN_PROLABORE = 1621.00;
+        const FAVORECIDO_NOME = "Zaqueu Fernandes Alves";
         const tabelasSimples = {
             'I': [{ faixaAte: 180000, aliquota: 4, deducao: 0 }, { faixaAte: 360000, aliquota: 7.3, deducao: 5940 }, { faixaAte: 720000, aliquota: 9.5, deducao: 13860 }, { faixaAte: 1800000, aliquota: 10.7, deducao: 22500 }, { faixaAte: 3600000, aliquota: 14.3, deducao: 87300 }, { faixaAte: 4800000, aliquota: 19, deducao: 378000 }],
             'II': [{ faixaAte: 180000, aliquota: 4.5, deducao: 0 }, { faixaAte: 360000, aliquota: 7.8, deducao: 5940 }, { faixaAte: 720000, aliquota: 10, deducao: 13860 }, { faixaAte: 1800000, aliquota: 11.2, deducao: 22500 }, { faixaAte: 3600000, aliquota: 14.7, deducao: 85500 }, { faixaAte: 4800000, aliquota: 30, deducao: 720000 }],
@@ -211,7 +214,6 @@
             calculoAtual = null;
         }
 
-        // Monitoramento de alteração nos campos
         const camposSensiveis = ['anexo', 'rbt12', 'faturamentoMes', 'valorProlabore', 'valorFolha', 'temProlabore', 'temFolha'];
         camposSensiveis.forEach(id => {
             const el = document.getElementById(id);
@@ -311,14 +313,11 @@
             document.getElementById('cardGratidao').classList.add('show');
         };
 
-        // LÓGICA DE CÓPIA ROBUSTA (Copiar Chave PIX)
         function abrirModalPix() { document.getElementById('modalPix').style.display = 'flex'; }
         function fecharModalPix() { document.getElementById('modalPix').style.display = 'none'; }
         
         function copiarChave() {
             const chave = document.getElementById('chavePix').textContent;
-            
-            // Método 1: Moderno
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(chave).then(() => {
                     alert('Chave PIX copiada com sucesso! 🎉');
@@ -326,7 +325,6 @@
                     fallbackCopiarTexto(chave);
                 });
             } else {
-                // Método 2: Reserva (Fallback)
                 fallbackCopiarTexto(chave);
             }
         }
@@ -334,7 +332,6 @@
         function fallbackCopiarTexto(texto) {
             const textArea = document.createElement("textarea");
             textArea.value = texto;
-            // Garante que o textarea não seja visível mas esteja no DOM
             textArea.style.position = "fixed";
             textArea.style.left = "-9999px";
             textArea.style.top = "0";
@@ -388,11 +385,12 @@
             doc.setFontSize(14); doc.setFont('helvetica', 'bold');
             doc.text('VALOR DAS:', 25, y+5); doc.text(formatarMoeda(calculoAtual.vDas), 95, y+5);
 
-            // Gratidão no PDF
+            // Gratidão no PDF com Favorecido Centralizado
             y += 25;
             doc.setFontSize(9); doc.setFont('helvetica', 'italic'); doc.setTextColor(100);
             doc.text('Se essa ferramenta foi útil pra você, apoie com R$ 1,00 (Um Real) para manter este projeto gratuito e atualizado.', 105, y, {align: 'center'});
             doc.text(`Chave PIX: ${document.getElementById('chavePix').textContent}`, 105, y+5, {align: 'center'});
+            doc.text(`Favorecido: ${FAVORECIDO_NOME}`, 105, y+10, {align: 'center'});
 
             doc.setLineWidth(0.1); doc.line(20, 275, 190, 275);
             doc.setFont('helvetica', 'normal');
