@@ -8,379 +8,61 @@
     <title>📟 Calculadora DAS Simples Nacional</title>
     <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQ2FsY3VsYWRvcmEgREFTIiwic2hvcnRfbmFtZSI6IkRBUyIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMWEyMDJjIiwidGhlbWVfY29sb3IiOiIjMWEyMDJjIn0=">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.6;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        body.dark {
-            background-color: #1a202c;
-            color: #e2e8f0;
-        }
-
-        body.light {
-            background-color: #f7fafc;
-            color: #2d3748;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .card {
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            transition: background-color 0.3s;
-        }
-
-        .dark .card {
-            background-color: #2d3748;
-        }
-
-        .light .card {
-            background-color: #ffffff;
-        }
-
-        .header {
-            padding: 24px;
-            border-bottom: 1px solid;
-            transition: border-color 0.3s;
-        }
-
-        .dark .header {
-            border-color: #4a5568;
-        }
-
-        .light .header {
-            border-color: #e2e8f0;
-        }
-
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .header h1 {
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        :root {
-            --transition-speed: 0.3s;
-            --border-color: #4a5568;
-        }
-
-        .theme-toggle {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .theme-toggle input[type="checkbox"] {
-            display: none;
-        }
-
-        .toggle-slider {
-            width: 3rem;
-            height: 1.5rem;
-            background-color: var(--border-color);
-            border-radius: 1rem;
-            position: relative;
-            transition: background-color var(--transition-speed);
-            cursor: pointer;
-        }
-
-        .toggle-slider::before {
-            content: '';
-            position: absolute;
-            width: 1.25rem;
-            height: 1.25rem;
-            background-color: white;
-            border-radius: 50%;
-            top: 0.125rem;
-            left: 0.125rem;
-            transition: transform var(--transition-speed);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .theme-toggle input[type="checkbox"]:checked + .toggle-slider {
-            background-color: #4299e1;
-        }
-
-        .theme-toggle input[type="checkbox"]:checked + .toggle-slider::before {
-            transform: translateX(1.5rem);
-        }
-
-        .subtitle {
-            font-size: 14px;
-            opacity: 0.7;
-        }
-
-        .body {
-            padding: 24px;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        label {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 8px;
-        }
-
-        .required {
-            color: #f56565;
-        }
-
-        .optional {
-            color: #a0aec0;
-            font-weight: normal;
-        }
-
-        input, select {
-            width: 100%;
-            height: 48px;
-            padding: 0 16px;
-            border: 2px solid;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: all 0.3s;
-            outline: none;
-        }
-
-        .dark input, .dark select {
-            background-color: #4a5568;
-            border-color: #4a5568;
-            color: #e2e8f0;
-        }
-
-        .light input, .light select {
-            background-color: #ffffff;
-            border-color: #cbd5e0;
-            color: #2d3748;
-        }
-
-        input:focus, select:focus {
-            border-color: #4299e1;
-        }
-
-        input.error, select.error {
-            border-color: #f56565;
-            background-color: rgba(245, 101, 101, 0.1);
-        }
-
-        .error-msg {
-            color: #f56565;
-            font-size: 14px;
-            margin-top: 6px;
-            display: none;
-        }
-
-        .error-msg.show {
-            display: block;
-        }
-
-        .preview {
-            margin-top: 12px;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            display: none;
-        }
-
-        .dark .preview {
-            background-color: #4a5568;
-            color: #a0aec0;
-        }
-
-        .light .preview {
-            background-color: #edf2f7;
-            color: #718096;
-        }
-
-        .preview.show {
-            display: block;
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 12px;
-            cursor: pointer;
-        }
-
-        .checkbox-group input {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-
-        .hidden-field {
-            display: none;
-            margin-top: 10px;
-            padding-left: 30px;
-        }
-
-        .hidden-field.show {
-            display: block;
-        }
-
-        .btn {
-            width: 100%;
-            height: 56px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.3s;
-            margin-bottom: 12px;
-        }
-
-        .btn-primary {
-            background-color: #4299e1;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: #3182ce;
-        }
-
-        .btn-success {
-            background-color: #48bb78;
-            color: white;
-            display: none;
-        }
-
-        .btn-success.show {
-            display: flex;
-        }
-
-        .btn-success:hover {
-            background-color: #38a169;
-        }
-
-        .result {
-            margin-top: 24px;
-            padding: 24px;
-            border-radius: 12px;
-            border: 4px solid;
-            text-align: center;
-            display: none;
-        }
-
-        .result.show {
-            display: block;
-        }
-
-        .dark .result {
-            background-color: rgba(72, 187, 120, 0.1);
-            border-color: #48bb78;
-        }
-
-        .light .result {
-            background-color: rgba(72, 187, 120, 0.05);
-            border-color: #48bb78;
-        }
-
-        .result-label {
-            font-size: 14px;
-            margin-bottom: 8px;
-            opacity: 0.8;
-        }
-
-        .result-value {
-            font-size: 48px;
-            font-weight: bold;
-            color: #48bb78;
-        }
-
-        .result-details {
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid rgba(72, 187, 120, 0.3);
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        .result-item {
-            font-size: 14px;
-        }
-
-        .footer {
-            padding: 16px;
-            border-top: 1px solid;
-            text-align: center;
-            font-size: 12px;
-            opacity: 0.6;
-        }
-
-        .dark .footer {
-            border-color: #4a5568;
-        }
-
-        .light .footer {
-            border-color: #e2e8f0;
-        }
-
-        @media (max-width: 640px) {
-            .container {
-                padding: 12px;
-            }
-
-            .header, .body {
-                padding: 16px;
-            }
-
-            .header h1 {
-                font-size: 20px;
-            }
-
-            .result-value {
-                font-size: 36px;
-            }
-
-            .result-details {
-                grid-template-columns: 1fr;
-                gap: 8px;
-            }
-        }
-
-        @media print {
-            body {
-                background: white;
-                color: black;
-            }
-
-            .btn, .theme-toggle, .footer {
-                display: none !important;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; transition: background-color 0.3s, color 0.3s; }
+        body.dark { background-color: #1a202c; color: #e2e8f0; }
+        body.light { background-color: #f7fafc; color: #2d3748; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .card { border-radius: 16px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); overflow: hidden; transition: background-color 0.3s; }
+        .dark .card { background-color: #2d3748; }
+        .light .card { background-color: #ffffff; }
+        .header { padding: 24px; border-bottom: 1px solid; transition: border-color 0.3s; }
+        .dark .header { border-color: #4a5568; }
+        .light .header { border-color: #e2e8f0; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 12px; }
+        .header h1 { font-size: 24px; font-weight: bold; }
+        .theme-toggle { display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none; }
+        .theme-toggle input[type="checkbox"] { display: none; }
+        .toggle-slider { width: 3rem; height: 1.5rem; background-color: #4a5568; border-radius: 1rem; position: relative; transition: background-color 0.3s; cursor: pointer; }
+        .toggle-slider::before { content: ''; position: absolute; width: 1.25rem; height: 1.25rem; background-color: white; border-radius: 50%; top: 0.125rem; left: 0.125rem; transition: transform 0.3s; }
+        .theme-toggle input[type="checkbox"]:checked + .toggle-slider { background-color: #4299e1; }
+        .theme-toggle input[type="checkbox"]:checked + .toggle-slider::before { transform: translateX(1.5rem); }
+        .subtitle { font-size: 14px; opacity: 0.7; }
+        .body { padding: 24px; }
+        .form-group { margin-bottom: 24px; }
+        label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; }
+        .required { color: #f56565; }
+        .optional { color: #a0aec0; font-weight: normal; }
+        input, select { width: 100%; height: 48px; padding: 0 16px; border: 2px solid; border-radius: 8px; font-size: 16px; transition: all 0.3s; outline: none; }
+        .dark input, .dark select { background-color: #4a5568; border-color: #4a5568; color: #e2e8f0; }
+        .light input, .light select { background-color: #ffffff; border-color: #cbd5e0; color: #2d3748; }
+        input:focus, select:focus { border-color: #4299e1; }
+        input.error { border-color: #f56565 !important; }
+        .error-msg { color: #f56565; font-size: 12px; margin-top: 5px; display: none; }
+        .error-msg.show { display: block; }
+        .preview { margin-top: 12px; padding: 12px; border-radius: 8px; font-size: 14px; display: none; }
+        .dark .preview { background-color: #4a5568; color: #a0aec0; }
+        .light .preview { background-color: #edf2f7; color: #718096; }
+        .preview.show { display: block; }
+
+        /* Estilos das Caixinhas do Fator R */
+        .checkbox-group { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; cursor: pointer; }
+        .checkbox-group input { width: 20px; height: 20px; cursor: pointer; }
+        .hidden-field { display: none; margin-top: 10px; padding-left: 30px; }
+        .hidden-field.show { display: block; }
+
+        .btn { width: 100%; height: 56px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; margin-bottom: 12px; }
+        .btn-primary { background-color: #4299e1; color: white; }
+        .btn-success { background-color: #48bb78; color: white; display: none; }
+        .btn-success.show { display: flex; }
+        .result { margin-top: 24px; padding: 24px; border-radius: 12px; border: 4px solid; text-align: center; display: none; }
+        .result.show { display: block; }
+        .dark .result { background-color: rgba(72, 187, 120, 0.1); border-color: #48bb78; }
+        .light .result { background-color: rgba(72, 187, 120, 0.05); border-color: #48bb78; }
+        .result-value { font-size: 48px; font-weight: bold; color: #48bb78; }
+        .footer { padding: 16px; border-top: 1px solid; text-align: center; font-size: 12px; opacity: 0.6; }
+        .dark .footer { border-color: #4a5568; }
+        .light .footer { border-color: #e2e8f0; }
     </style>
 </head>
 <body class="dark">
@@ -412,72 +94,59 @@
 
                     <div class="form-group">
                         <label for="anexo">3. Anexo do Simples Nacional <span class="required">*</span></label>
-                        <select id="anexo">
-                            <option value="">Escolha o Anexo</option>
+                        <select id="anexo" required>
+                            <option value="">Escolha o tipo de atividade</option>
                             <option value="I">Anexo I - Comércio</option>
                             <option value="II">Anexo II - Indústria</option>
-                            <option value="III">Anexo III - Serviços</option>
                             <option value="IV">Anexo IV - Serviços (INSS Patronal fora)</option>
-                            <option value="V">Anexo V - Serviços (Fator R)</option>
-                            <option value="FATOR_R">Serviços Sujeitos ao Fator R (III ou V)</option>
+                            <option value="FATOR_R">Serviços (Sujeitos ao Fator R)</option>
                         </select>
-                        <div class="error-msg" id="errorAnexo">⚠️ Selecione o Anexo corretamente</div>
                     </div>
 
                     <div id="blocoFatorR" style="display: none; background: rgba(66, 153, 225, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #4299e1;">
+                        <p style="font-size: 13px; margin-bottom: 15px; font-weight: bold; color: #4299e1;">🔍 Verificação de Gasto com Pessoal (Fator R)</p>
+                        
                         <label class="checkbox-group">
                             <input type="checkbox" id="temProlabore"> Tem Pró-labore?
                         </label>
                         <div id="fieldProlabore" class="hidden-field">
-                            <label>Valor acumulado Pró-labore (12m)</label>
-                            <input type="text" id="valorProlabore" class="money-input" placeholder="R$ 0,00">
+                            <label>Soma Pró-labore (últimos 12 meses)</label>
+                            <input type="text" id="valorProlabore" placeholder="R$ 0,00">
+                            <div class="error-msg" id="errorMinProlabore">⚠️ Mínimo legal: R$ 1.621,00 (Salário-Mínimo 2026)</div>
                         </div>
 
                         <label class="checkbox-group" style="margin-top: 10px;">
                             <input type="checkbox" id="temFolha"> Tem Folha de Pagamento?
                         </label>
                         <div id="fieldFolha" class="hidden-field">
-                            <label>Valor acumulado Folha (12m)</label>
-                            <input type="text" id="valorFolha" class="money-input" placeholder="R$ 0,00">
+                            <label>Soma Salários/FGTS (últimos 12 meses)</label>
+                            <input type="text" id="valorFolha" placeholder="R$ 0,00">
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="rbt12">4. Faturamento bruto acumulado dos últimos 12 meses (RBT12) <span class="required">*</span></label>
-                        <input type="text" id="rbt12" placeholder="Preencha esse campo...">
-                        <div class="error-msg" id="errorRbt12">⚠️ Este campo é obrigatório, preencha corretamente</div>
+                        <label for="rbt12">4. Faturamento bruto acumulado (RBT12) <span class="required">*</span></label>
+                        <input type="text" id="rbt12" required placeholder="R$ 0,00">
                         <div class="preview" id="previewRbt12"></div>
                     </div>
 
                     <div class="form-group">
                         <label for="faturamentoMes">5. Faturamento do mês atual <span class="required">*</span></label>
-                        <input type="text" id="faturamentoMes" placeholder="Preencha esse campo...">
-                        <div class="error-msg" id="errorFaturamentoMes">⚠️ Este campo é obrigatório, preencha corretamente</div>
+                        <input type="text" id="faturamentoMes" required placeholder="R$ 0,00">
                         <div class="preview" id="previewFaturamentoMes"></div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary">
-                        📟 Calcular DAS
-                    </button>
-
-                    <button type="button" class="btn btn-success" id="btnPdf">
-                        📥 Gerar PDF
-                    </button>
+                    <button type="submit" class="btn btn-primary">📟 Calcular DAS</button>
+                    <button type="button" class="btn btn-success" id="btnPdf">📥 Gerar PDF</button>
                 </form>
 
                 <div class="result" id="resultado">
                     <div id="infoFatorR" style="font-size: 12px; margin-bottom: 10px; color: #4299e1; font-weight: bold;"></div>
                     <div class="result-label">DAS desse Mês</div>
                     <div class="result-value" id="valorDas">R$ 0,00</div>
-                    <div class="result-details">
-                        <div class="result-item">
-                            <div style="opacity: 0.7;">Alíquota Nominal</div>
-                            <div style="font-weight: bold; margin-top: 4px;" id="aliquotaNominal">0,00%</div>
-                        </div>
-                        <div class="result-item">
-                            <div style="opacity: 0.7;">Alíquota Efetiva</div>
-                            <div style="font-weight: bold; margin-top: 4px;" id="aliquotaEfetiva">0,00%</div>
-                        </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; margin-top: 15px;">
+                        <div><small>Alíquota Nominal</small><br><strong id="aliquotaNominal">0%</strong></div>
+                        <div><small>Alíquota Efetiva</small><br><strong id="aliquotaEfetiva">0%</strong></div>
                     </div>
                 </div>
             </div>
@@ -490,297 +159,130 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
-        // Tabelas Simples Nacional 2026 (LC 123/2006)
+        const MIN_PROLABORE = 1621.00;
         const tabelasSimples = {
-            'I': [
-                { faixaAte: 180000, aliquota: 4.00, deducao: 0 },
-                { faixaAte: 360000, aliquota: 7.30, deducao: 5940 },
-                { faixaAte: 720000, aliquota: 9.50, deducao: 13860 },
-                { faixaAte: 1800000, aliquota: 10.70, deducao: 22500 },
-                { faixaAte: 3600000, aliquota: 14.30, deducao: 87300 },
-                { faixaAte: 4800000, aliquota: 19.00, deducao: 378000 }
-            ],
-            'II': [
-                { faixaAte: 180000, aliquota: 4.50, deducao: 0 },
-                { faixaAte: 360000, aliquota: 7.80, deducao: 5940 },
-                { faixaAte: 720000, aliquota: 10.00, deducao: 13860 },
-                { faixaAte: 1800000, aliquota: 11.20, deducao: 22500 },
-                { faixaAte: 3600000, aliquota: 14.70, deducao: 85500 },
-                { faixaAte: 4800000, aliquota: 30.00, deducao: 720000 }
-            ],
-            'III': [
-                { faixaAte: 180000, aliquota: 6.00, deducao: 0 },
-                { faixaAte: 360000, aliquota: 11.20, deducao: 9360 },
-                { faixaAte: 720000, aliquota: 13.50, deducao: 17640 },
-                { faixaAte: 1800000, aliquota: 16.00, deducao: 35640 },
-                { faixaAte: 3600000, aliquota: 21.00, deducao: 125640 },
-                { faixaAte: 4800000, aliquota: 33.00, deducao: 648000 }
-            ],
-            'IV': [
-                { faixaAte: 180000, aliquota: 4.50, deducao: 0 },
-                { faixaAte: 360000, aliquota: 9.00, deducao: 8100 },
-                { faixaAte: 720000, aliquota: 10.20, deducao: 12420 },
-                { faixaAte: 1800000, aliquota: 14.00, deducao: 39780 },
-                { faixaAte: 3600000, aliquota: 22.00, deducao: 183780 },
-                { faixaAte: 4800000, aliquota: 33.00, deducao: 828000 }
-            ],
-            'V': [
-                { faixaAte: 180000, aliquota: 15.50, deducao: 0 },
-                { faixaAte: 360000, aliquota: 18.00, deducao: 4500 },
-                { faixaAte: 720000, aliquota: 19.50, deducao: 9900 },
-                { faixaAte: 1800000, aliquota: 20.50, deducao: 17100 },
-                { faixaAte: 3600000, aliquota: 23.00, deducao: 62100 },
-                { faixaAte: 4800000, aliquota: 30.50, deducao: 540000 }
-            ]
+            'I': [{ faixaAte: 180000, aliquota: 4, deducao: 0 }, { faixaAte: 360000, aliquota: 7.3, deducao: 5940 }, { faixaAte: 720000, aliquota: 9.5, deducao: 13860 }, { faixaAte: 1800000, aliquota: 10.7, deducao: 22500 }, { faixaAte: 3600000, aliquota: 14.3, deducao: 87300 }, { faixaAte: 4800000, aliquota: 19, deducao: 378000 }],
+            'II': [{ faixaAte: 180000, aliquota: 4.5, deducao: 0 }, { faixaAte: 360000, aliquota: 7.8, deducao: 5940 }, { faixaAte: 720000, aliquota: 10, deducao: 13860 }, { faixaAte: 1800000, aliquota: 11.2, deducao: 22500 }, { faixaAte: 3600000, aliquota: 14.7, deducao: 85500 }, { faixaAte: 4800000, aliquota: 30, deducao: 720000 }],
+            'III': [{ faixaAte: 180000, aliquota: 6, deducao: 0 }, { faixaAte: 360000, aliquota: 11.2, deducao: 9360 }, { faixaAte: 720000, aliquota: 13.5, deducao: 17640 }, { faixaAte: 1800000, aliquota: 16, deducao: 35640 }, { faixaAte: 3600000, aliquota: 21, deducao: 125640 }, { faixaAte: 4800000, aliquota: 33, deducao: 648000 }],
+            'IV': [{ faixaAte: 180000, aliquota: 4.5, deducao: 0 }, { faixaAte: 360000, aliquota: 9, deducao: 8100 }, { faixaAte: 720000, aliquota: 10.2, deducao: 12420 }, { faixaAte: 1800000, aliquota: 14, deducao: 39780 }, { faixaAte: 3600000, aliquota: 22, deducao: 183780 }, { faixaAte: 4800000, aliquota: 33, deducao: 828000 }],
+            'V': [{ faixaAte: 180000, aliquota: 15.5, deducao: 0 }, { faixaAte: 360000, aliquota: 18, deducao: 4500 }, { faixaAte: 720000, aliquota: 19.5, deducao: 9900 }, { faixaAte: 1800000, aliquota: 20.5, deducao: 17100 }, { faixaAte: 3600000, aliquota: 23, deducao: 62100 }, { faixaAte: 4800000, aliquota: 30.5, deducao: 540000 }]
         };
 
-        // Variáveis globais
         let calculoAtual = null;
-        let anexoAnterior = null;
 
-        // Toggle tema
-        const themeToggle = document.getElementById('themeToggle');
-        const themeLabel = document.getElementById('themeLabel');
-        const body = document.body;
+        function parseMoeda(v) { return parseFloat(v.replace(/[^\d,]/g, '').replace(',', '.')) || 0; }
+        function formatarMoeda(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v); }
+        function aplicarMascara(i) {
+            let v = i.value.replace(/\D/g, '');
+            v = (v / 100).toFixed(2);
+            i.value = 'R$ ' + v.replace('.', ',').replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+        }
 
-        themeToggle.addEventListener('change', function() {
-            if (this.checked) {
-                body.classList.remove('dark');
-                body.classList.add('light');
-                themeLabel.textContent = '☀️ Modo Escuro';
-            } else {
-                body.classList.remove('light');
-                body.classList.add('dark');
-                themeLabel.textContent = '🌙 Modo Claro';
-            }
+        document.querySelectorAll('input[placeholder*="R$"], #rbt12, #faturamentoMes').forEach(input => {
+            input.addEventListener('input', () => { 
+                aplicarMascara(input); 
+                if(input.id === 'valorProlabore') validarProlabore(input);
+                calcularPrevia(); 
+            });
         });
 
-        // Lógica Fator R - Exibição de campos
+        function validarProlabore(input) {
+            const val = parseMoeda(input.value);
+            const err = document.getElementById('errorMinProlabore');
+            if (document.getElementById('temProlabore').checked && val > 0 && val < MIN_PROLABORE) {
+                input.classList.add('error');
+                err.classList.add('show');
+                return false;
+            } else {
+                input.classList.remove('error');
+                err.classList.remove('show');
+                return true;
+            }
+        }
+
         const selectAnexo = document.getElementById('anexo');
         const blocoFatorR = document.getElementById('blocoFatorR');
-        const checkProlabore = document.getElementById('temProlabore');
-        const checkFolha = document.getElementById('temFolha');
-        const fieldProlabore = document.getElementById('fieldProlabore');
-        const fieldFolha = document.getElementById('fieldFolha');
-
         selectAnexo.addEventListener('change', function() {
-            if (this.value === 'FATOR_R') {
-                blocoFatorR.style.display = 'block';
-            } else {
-                blocoFatorR.style.display = 'none';
-            }
+            blocoFatorR.style.display = (this.value === 'FATOR_R') ? 'block' : 'none';
             calcularPrevia();
         });
 
-        checkProlabore.addEventListener('change', function() {
-            fieldProlabore.classList.toggle('show', this.checked);
-        });
+        document.getElementById('temProlabore').onclick = function() { 
+            const field = document.getElementById('fieldProlabore');
+            field.classList.toggle('show', this.checked);
+            if(!this.checked) {
+                document.getElementById('valorProlabore').classList.remove('error');
+                document.getElementById('errorMinProlabore').classList.remove('show');
+            }
+        };
+        document.getElementById('temFolha').onclick = function() { document.getElementById('fieldFolha').classList.toggle('show', this.checked); };
 
-        checkFolha.addEventListener('change', function() {
-            fieldFolha.classList.toggle('show', this.checked);
-        });
-
-        // Formatação de moeda
-        function formatarMoeda(valor) {
-            return new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            }).format(valor);
-        }
-
-        function parseMoeda(valor) {
-            if(!valor) return 0;
-            return parseFloat(valor.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
-        }
-
-        function aplicarMascaraMoeda(input) {
-            let valor = input.value.replace(/\D/g, '');
-            valor = (valor / 100).toFixed(2);
-            input.value = 'R$ ' + valor.replace('.', ',').replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
-        }
-
-        // Aplicar máscara aos campos
-        document.querySelectorAll('input[placeholder*="R$"], #rbt12, #faturamentoMes').forEach(input => {
-            input.addEventListener('input', function() {
-                aplicarMascaraMoeda(this);
-                calcularPrevia();
-            });
-        });
-
-        // Calcular prévia
         function calcularPrevia() {
-            let anexo = document.getElementById('anexo').value;
+            let anexo = selectAnexo.value;
             const rbt12 = parseMoeda(document.getElementById('rbt12').value);
-            const faturamentoMes = parseMoeda(document.getElementById('faturamentoMes').value);
-
-            const previewRbt12 = document.getElementById('previewRbt12');
-            const previewFaturamentoMes = document.getElementById('previewFaturamentoMes');
-
-            // Se for Fator R, decidir qual anexo mostrar na prévia
-            if (anexo === 'FATOR_R') {
-                const folha = parseMoeda(document.getElementById('valorFolha').value);
-                const prolabore = parseMoeda(document.getElementById('valorProlabore').value);
-                const totalFolha = folha + prolabore;
-                
-                if (rbt12 > 0) {
-                    const fatorRValue = totalFolha / rbt12;
-                    anexo = (fatorRValue >= 0.28) ? 'III' : 'V';
-                } else {
-                    anexo = null;
-                }
+            if (anexo === 'FATOR_R' && rbt12 > 0) {
+                const totalPessoal = parseMoeda(document.getElementById('valorProlabore').value) + parseMoeda(document.getElementById('valorFolha').value);
+                anexo = (totalPessoal / rbt12 >= 0.28) ? 'III' : 'V';
             }
-
-            if (anexo && rbt12 > 0) {
-                const faixa = encontrarFaixa(anexo, rbt12);
-                if (faixa) {
-                    previewRbt12.innerHTML = `
-                        📊 Prévia automática (Anexo ${anexo}):<br>
-                        • Alíquota Nominal: ${faixa.aliquota.toFixed(2)}%<br>
-                        • Parcela a Deduzir: ${formatarMoeda(faixa.deducao)}
-                    `;
-                    previewRbt12.classList.add('show');
-                }
-            } else {
-                previewRbt12.classList.remove('show');
-            }
-
-            if (anexo && rbt12 > 0 && faturamentoMes > 0) {
-                const aliquotaEfetiva = calcularAliquotaEfetiva(anexo, rbt12);
-                previewFaturamentoMes.innerHTML = `📊 Alíquota Efetiva: ${aliquotaEfetiva.toFixed(2)}%`;
-                previewFaturamentoMes.classList.add('show');
-            } else {
-                previewFaturamentoMes.classList.remove('show');
-            }
+            if (anexo && anexo !== 'FATOR_R' && rbt12 > 0) {
+                const faixa = tabelasSimples[anexo].find(f => rbt12 <= f.faixaAte);
+                document.getElementById('previewRbt12').innerHTML = `Aplicação: <b>Anexo ${anexo}</b> - Alíquota: ${faixa.aliquota}%`;
+                document.getElementById('previewRbt12').classList.add('show');
+            } else { document.getElementById('previewRbt12').classList.remove('show'); }
         }
 
-        function encontrarFaixa(anexo, rbt12) {
-            const tabela = tabelasSimples[anexo];
-            if (!tabela) return null;
-            for (let faixa of tabela) {
-                if (rbt12 <= faixa.faixaAte) return faixa;
-            }
-            return null;
-        }
-
-        function calcularAliquotaEfetiva(anexo, rbt12) {
-            const faixa = encontrarFaixa(anexo, rbt12);
-            if (!faixa || rbt12 === 0) return 0;
-            const aliquotaEfetiva = ((rbt12 * (faixa.aliquota / 100)) - faixa.deducao) / rbt12 * 100;
-            return Math.max(0, aliquotaEfetiva);
-        }
-
-        // Calcular DAS
-        document.getElementById('dasForm').addEventListener('submit', function(e) {
+        document.getElementById('dasForm').onsubmit = function(e) {
             e.preventDefault();
-
-            let selectedAnexo = document.getElementById('anexo').value;
-            const rbt12 = parseMoeda(document.getElementById('rbt12').value);
-            const faturamentoMes = parseMoeda(document.getElementById('faturamentoMes').value);
-
-            if (!selectedAnexo || rbt12 <= 0 || faturamentoMes <= 0) {
-                alert('Preencha todos os campos obrigatórios.');
+            
+            // Validar Prolabore antes de processar
+            if(document.getElementById('temProlabore').checked && !validarProlabore(document.getElementById('valorProlabore'))) {
+                alert('O valor do Pró-labore não pode ser inferior ao salário-mínimo (R$ 1.621,00).');
                 return;
             }
 
-            let textoFatorR = "";
-            // Lógica Final do Fator R
-            if (selectedAnexo === 'FATOR_R') {
-                const folha = parseMoeda(document.getElementById('valorFolha').value);
-                const prolabore = parseMoeda(document.getElementById('valorProlabore').value);
-                const totalFolha = folha + prolabore;
-                const ratio = totalFolha / rbt12;
-                
-                if (ratio >= 0.28) {
-                    selectedAnexo = 'III';
-                    textoFatorR = `Fator R: ${(ratio * 100).toFixed(2)}% (>= 28%). Enquadrado no ANEXO III`;
-                } else {
-                    selectedAnexo = 'V';
-                    textoFatorR = `Fator R: ${(ratio * 100).toFixed(2)}% (< 28%). Enquadrado no ANEXO V`;
-                }
+            let anexoReal = selectAnexo.value;
+            const rbt12 = parseMoeda(document.getElementById('rbt12').value);
+            const fatMes = parseMoeda(document.getElementById('faturamentoMes').value);
+            let descFatorR = "";
+
+            if (anexoReal === 'FATOR_R') {
+                const totalPessoal = parseMoeda(document.getElementById('valorProlabore').value) + parseMoeda(document.getElementById('valorFolha').value);
+                const ratio = totalPessoal / rbt12;
+                anexoReal = (ratio >= 0.28) ? 'III' : 'V';
+                descFatorR = `Fator R: ${(ratio * 100).toFixed(2)}% -> Enquadrado no Anexo ${anexoReal}`;
             }
 
-            const faixa = encontrarFaixa(selectedAnexo, rbt12);
-            const aliquotaEfetiva = calcularAliquotaEfetiva(selectedAnexo, rbt12);
-            const valorDas = faturamentoMes * (aliquotaEfetiva / 100);
+            const faixa = tabelasSimples[anexoReal].find(f => rbt12 <= f.faixaAte);
+            const aliqEf = ((rbt12 * (faixa.aliquota / 100)) - faixa.deducao) / rbt12 * 100;
+            const vDas = fatMes * (aliqEf / 100);
 
-            calculoAtual = {
-                empresa: document.getElementById('empresa').value || 'Não informado',
-                responsavel: document.getElementById('responsavel').value || 'Não informado',
-                anexo: 'Anexo ' + selectedAnexo,
-                fatorRInfo: textoFatorR,
-                rbt12: rbt12,
-                faturamentoMes: faturamentoMes,
-                aliquotaNominal: faixa.aliquota,
-                parcelaDeducao: faixa.deducao,
-                aliquotaEfetiva: aliquotaEfetiva,
-                valorDas: valorDas
-            };
-
-            document.getElementById('infoFatorR').textContent = textoFatorR;
-            document.getElementById('valorDas').textContent = formatarMoeda(valorDas);
-            document.getElementById('aliquotaNominal').textContent = faixa.aliquota.toFixed(2) + '%';
-            document.getElementById('aliquotaEfetiva').textContent = aliquotaEfetiva.toFixed(2) + '%';
+            calculoAtual = { empresa: document.getElementById('empresa').value, anexo: anexoReal, fatMes, aliqNom: faixa.aliquota, aliqEf, vDas, descFatorR };
+            
+            document.getElementById('infoFatorR').textContent = descFatorR;
+            document.getElementById('valorDas').textContent = formatarMoeda(vDas);
+            document.getElementById('aliquotaNominal').textContent = faixa.aliquota + '%';
+            document.getElementById('aliquotaEfetiva').textContent = aliqEf.toFixed(2) + '%';
             document.getElementById('resultado').classList.add('show');
             document.getElementById('btnPdf').classList.add('show');
-        });
+        };
 
-        // Exportar PDF
-        document.getElementById('btnPdf').addEventListener('click', function() {
-            if (!calculoAtual) return;
+        document.getElementById('themeToggle').onclick = function() {
+            document.body.className = this.checked ? 'light' : 'dark';
+            document.getElementById('themeLabel').textContent = this.checked ? '☀️ Modo Escuro' : '🌙 Modo Claro';
+        };
+
+        document.getElementById('btnPdf').onclick = function() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-
-            doc.setFontSize(18);
-            doc.setFont('helvetica', 'bold');
-            doc.text('Cálculo DAS Simples Nacional', 105, 20, { align: 'center' });
-            doc.setLineWidth(0.5);
-            doc.line(20, 25, 190, 25);
-
-            doc.setFontSize(12);
-            let y = 40;
-
-            const dados = [
-                ['Nome da empresa:', calculoAtual.empresa],
-                ['Responsável pelo cálculo:', calculoAtual.responsavel],
-                ['Anexo Utilizado:', calculoAtual.anexo],
-                ['Observação:', calculoAtual.fatorRInfo || 'N/A'],
-                ['RBT12 (12 meses):', formatarMoeda(calculoAtual.rbt12)],
-                ['Faturamento do mês:', formatarMoeda(calculoAtual.faturamentoMes)],
-                ['Alíquota Nominal:', calculoAtual.aliquotaNominal.toFixed(2) + '%'],
-                ['Parcela a Deduzir:', formatarMoeda(calculoAtual.parcelaDeducao)],
-                ['Alíquota Efetiva:', calculoAtual.aliquotaEfetiva.toFixed(2) + '%']
-            ];
-
-            dados.forEach(([label, value]) => {
-                doc.setFont('helvetica', 'bold');
-                doc.text(label, 20, y);
-                doc.setFont('helvetica', 'normal');
-                doc.text(value, 80, y);
-                y += 10;
-            });
-
-            y += 10;
-            doc.setFillColor(240, 240, 240);
-            doc.rect(20, y - 5, 170, 20, 'F');
-            doc.setFont('helvetica', 'bold');
-            doc.text('Valor do DAS:', 25, y + 5);
-            doc.setTextColor(72, 187, 120);
-            doc.setFontSize(18);
-            doc.text(formatarMoeda(calculoAtual.valorDas), 25, y + 13);
-            
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(10);
-            doc.line(20, 270, 190, 270);
-            doc.text('© Copyright 2026: Zaqueu Fernandes (88)9.9401-4262', 105, 280, { align: 'center' });
-
-            doc.save('DAS-Simples-Nacional.pdf');
-        });
-
-        // Service Worker (PWA)
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('data:text/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdpbnN0YWxsJywgZnVuY3Rpb24oZSkge2Uud2FpdFVudGlsKHNlbGYuc2tpcFdhaXRpbmcoKSl9KTtzZWxmLmFkZEV2ZW50TGlzdGVuZXIoJ2ZldGNoJyxmdW5jdGlvbihlKXtlfSk7')
-                .catch(function(err) { console.log('SW registration failed'); });
-        }
+            doc.text('Cálculo DAS Simples Nacional', 20, 20);
+            doc.text(`Empresa: ${calculoAtual.empresa || 'N/A'}`, 20, 40);
+            doc.text(`Anexo: ${calculoAtual.anexo}`, 20, 50);
+            doc.text(`${calculoAtual.descFatorR}`, 20, 60);
+            doc.text(`Faturamento Mês: ${formatarMoeda(calculoAtual.fatMes)}`, 20, 70);
+            doc.text(`Alíquota Efetiva: ${calculoAtual.aliqEf.toFixed(2)}%`, 20, 80);
+            doc.text(`VALOR DAS: ${formatarMoeda(calculoAtual.vDas)}`, 20, 100);
+            doc.save('DAS.pdf');
+        };
     </script>
 </body>
 </html>
