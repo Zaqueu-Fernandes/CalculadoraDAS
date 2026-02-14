@@ -48,23 +48,21 @@
         .checkbox-group input { width: 20px; height: 20px; cursor: pointer; }
         .hidden-field { display: none; margin-top: 10px; padding-left: 30px; }
         .hidden-field.show { display: block; }
-        
         .btn { width: 100%; height: 56px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; margin-bottom: 12px; }
         .btn-primary { background-color: #4299e1; color: white; }
         .btn-success { background-color: #48bb78; color: white; display: none; }
         .btn-success.show { display: flex; }
 
-        /* Estilo Card Gratidão */
+        /* Estilos de Gratidão */
         #cardGratidao { display: none; background: rgba(72, 187, 120, 0.1); border: 1px dashed #48bb78; border-radius: 8px; padding: 15px; margin-top: 20px; text-align: center; }
         #cardGratidao.show { display: block; }
         .btn-pix { background: none; border: 1px solid #48bb78; color: #48bb78; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; margin-top: 8px; }
-
-        /* Modal Styles */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; }
+        
+        /* Modal */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; }
         .modal-content { background: white; padding: 30px; border-radius: 16px; max-width: 400px; width: 90%; text-align: center; color: #2d3748; }
-        .modal-content h2 { margin-bottom: 15px; color: #2d3748; }
-        .pix-key { background: #f7fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; font-family: monospace; margin: 15px 0; word-break: break-all; }
-        .close-modal { margin-top: 20px; background: #4a5568; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+        .pix-key { background: #f7fafc; padding: 12px; border-radius: 8px; border: 2px dashed #cbd5e0; font-family: monospace; margin: 15px 0; font-weight: bold; font-size: 14px; word-break: break-all; }
+        .close-modal { margin-top: 15px; background: #e2e8f0; color: #4a5568; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
         .result { margin-top: 24px; padding: 24px; border-radius: 12px; border: 4px solid; text-align: center; display: none; }
         .result.show { display: block; }
@@ -116,6 +114,7 @@
 
                     <div id="blocoFatorR" style="display: none; background: rgba(66, 153, 225, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #4299e1;">
                         <p style="font-size: 13px; margin-bottom: 15px; font-weight: bold; color: #4299e1;">🔍 Verificação de Gasto com Pessoal (Fator R)</p>
+                        
                         <label class="checkbox-group">
                             <input type="checkbox" id="temProlabore"> Tem Pró-labore?
                         </label>
@@ -161,7 +160,7 @@
                     </div>
 
                     <div id="cardGratidao">
-                        <p style="font-size: 13px; color: #48bb78;">Cálculo realizado! 🎉 Se esta ferramenta foi útil, considere apoiar o projeto com R$ 1,00.</p>
+                        <p style="font-size: 13px; color: #48bb78;">Cálculo realizado! 🎉 Se esta ferramenta foi útil, considere apoiar o projeto com R$ 1,00 (Um Real) para mantê-lo gratuito e atualizado.</p>
                         <button class="btn-pix" onclick="abrirModalPix()">🎁 Demonstrar Gratidão (PIX R$ 1,00)</button>
                     </div>
                 </div>
@@ -176,12 +175,11 @@
 
     <div id="modalPix" class="modal">
         <div class="modal-content">
-            <h2>Demonstrar Gratidão ☕</h2>
-            <p>Se esta aplicação facilitou a sua vida, você pode contribuir com um PIX simbólico de <b>R$ 1,00</b>.</p>
-            <div class="pix-key" id="chavePix Celular">88994014262</div>
-            <button class="btn-primary" onclick="copiarChave()" style="height: 40px; margin-top: 10px;">Copiar Chave PIX</button>
-            <br>
-            <button class="close-modal" onclick="fecharModalPix()">Voltar</button>
+            <h2 style="margin-bottom: 10px;">Gratidão! ☕</h2>
+            <p style="font-size: 14px;">Se essa ferramenta foi útil pra você, Contribua com R$ 1,00 (Um Real) para manter este projeto gratuito e atualizado.</p>
+            <div class="pix-key" id="chavePix">88994014262</div>
+            <button class="btn-primary" onclick="copiarChave()" style="height: 45px;">Copiar Chave PIX</button>
+            <button class="close-modal" onclick="fecharModalPix()">Fechar</button>
         </div>
     </div>
 
@@ -213,6 +211,7 @@
             calculoAtual = null;
         }
 
+        // Monitoramento de alteração nos campos
         const camposSensiveis = ['anexo', 'rbt12', 'faturamentoMes', 'valorProlabore', 'valorFolha', 'temProlabore', 'temFolha'];
         camposSensiveis.forEach(id => {
             const el = document.getElementById(id);
@@ -235,17 +234,19 @@
             const isChecked = document.getElementById(checkId).checked;
             const rawValue = input.value.replace(/[^\d]/g, '');
             const val = parseMoeda(input.value);
+
             if (!isChecked) { input.classList.remove('error'); err.classList.remove('show'); return true; }
             if (rawValue === "" || rawValue === "000") { input.classList.add('error'); err.textContent = "⚠️ Este campo não pode ser vazio"; err.classList.add('show'); return false; }
             if (val < 0) { input.classList.add('error'); err.textContent = "⚠️ O valor não pode ser menor que zero"; err.classList.add('show'); return false; }
-            if (isProlabore && val < MIN_PROLABORE) { input.classList.add('error'); err.textContent = `⚠️ Mínimo legal: R$ 1.621,00`; err.classList.add('show'); return false; }
-            input.classList.remove('error'); err.classList.remove('show'); return true;
+            if (isProlabore && val < MIN_PROLABORE) { input.classList.add('error'); err.textContent = `⚠️ Mínimo legal: R$ 1.621,00 (Salário mínimo vigente 2026)`; err.classList.add('show'); return false; }
+
+            input.classList.remove('error');
+            err.classList.remove('show');
+            return true;
         }
 
-        const selectAnexo = document.getElementById('anexo');
-        const blocoFatorR = document.getElementById('blocoFatorR');
-        selectAnexo.addEventListener('change', function() {
-            blocoFatorR.style.display = (this.value === 'FATOR_R') ? 'block' : 'none';
+        document.getElementById('anexo').addEventListener('change', function() {
+            document.getElementById('blocoFatorR').style.display = (this.value === 'FATOR_R') ? 'block' : 'none';
             calcularPrevia();
         });
 
@@ -261,7 +262,7 @@
         };
 
         function calcularPrevia() {
-            let anexo = selectAnexo.value;
+            let anexo = document.getElementById('anexo').value;
             const rbt12 = parseMoeda(document.getElementById('rbt12').value);
             if (anexo === 'FATOR_R' && rbt12 > 0) {
                 const totalPessoal = parseMoeda(document.getElementById('valorProlabore').value) + parseMoeda(document.getElementById('valorFolha').value);
@@ -278,7 +279,7 @@
             e.preventDefault();
             if(!validarCampoFatorR('valorProlabore', 'errorProlabore', 'temProlabore', true) || !validarCampoFatorR('valorFolha', 'errorFolha', 'temFolha', false)) return;
 
-            let anexoReal = selectAnexo.value;
+            let anexoReal = document.getElementById('anexo').value;
             const rbt12 = parseMoeda(document.getElementById('rbt12').value);
             const fatMes = parseMoeda(document.getElementById('faturamentoMes').value);
             const vProlabore = parseMoeda(document.getElementById('valorProlabore').value);
@@ -288,7 +289,7 @@
             if (anexoReal === 'FATOR_R') {
                 const ratio = (vProlabore + vFolha) / rbt12;
                 anexoReal = (ratio >= 0.28) ? 'III' : 'V';
-                descFatorR = `Fator R: ${(ratio * 100).toFixed(2)}% -> Enquadrado no Anexo ${anexoReal}`;
+                descFatorR = `Fator R: ${(ratio * 100).toFixed(2)}% -> Anexo ${anexoReal}`;
             }
 
             const faixa = tabelasSimples[anexoReal].find(f => rbt12 <= f.faixaAte);
@@ -310,12 +311,43 @@
             document.getElementById('cardGratidao').classList.add('show');
         };
 
-        // Funções do Modal PIX
+        // LÓGICA DE CÓPIA ROBUSTA (Copiar Chave PIX)
         function abrirModalPix() { document.getElementById('modalPix').style.display = 'flex'; }
         function fecharModalPix() { document.getElementById('modalPix').style.display = 'none'; }
+        
         function copiarChave() {
             const chave = document.getElementById('chavePix').textContent;
-            navigator.clipboard.writeText(chave).then(() => alert('Chave PIX copiada!'));
+            
+            // Método 1: Moderno
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(chave).then(() => {
+                    alert('Chave PIX copiada com sucesso! 🎉');
+                }).catch(err => {
+                    fallbackCopiarTexto(chave);
+                });
+            } else {
+                // Método 2: Reserva (Fallback)
+                fallbackCopiarTexto(chave);
+            }
+        }
+
+        function fallbackCopiarTexto(texto) {
+            const textArea = document.createElement("textarea");
+            textArea.value = texto;
+            // Garante que o textarea não seja visível mas esteja no DOM
+            textArea.style.position = "fixed";
+            textArea.style.left = "-9999px";
+            textArea.style.top = "0";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                alert('Chave PIX copiada com sucesso! 🎉');
+            } catch (err) {
+                alert('Erro ao copiar. Por favor, selecione e copie manualmente.');
+            }
+            document.body.removeChild(textArea);
         }
 
         document.getElementById('themeToggle').onclick = function() {
@@ -331,7 +363,6 @@
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(16);
             doc.text('Cálculo DAS Simples Nacional', 105, 20, { align: 'center' });
-            doc.setLineWidth(0.2);
             doc.line(20, 25, 190, 25);
 
             doc.setFontSize(11);
@@ -357,13 +388,14 @@
             doc.setFontSize(14); doc.setFont('helvetica', 'bold');
             doc.text('VALOR DAS:', 25, y+5); doc.text(formatarMoeda(calculoAtual.vDas), 95, y+5);
 
-            // OPÇÃO 3: Nota de Gratidão no PDF
+            // Gratidão no PDF
             y += 25;
             doc.setFontSize(9); doc.setFont('helvetica', 'italic'); doc.setTextColor(100);
-            doc.text('Esta ferramenta é gratuita. Se foi útil, considere apoiar o desenvolvedor com R$ 1,00.', 105, y, {align: 'center'});
-            doc.text('Chave PIX: SEU-EMAIL-OU-CELULAR-AQUI', 105, y+5, {align: 'center'});
+            doc.text('Se essa ferramenta foi útil pra você, apoie com R$ 1,00 (Um Real) para manter este projeto gratuito e atualizado.', 105, y, {align: 'center'});
+            doc.text(`Chave PIX: ${document.getElementById('chavePix').textContent}`, 105, y+5, {align: 'center'});
 
-            doc.setTextColor(100); doc.setLineWidth(0.1); doc.line(20, 275, 190, 275);
+            doc.setLineWidth(0.1); doc.line(20, 275, 190, 275);
+            doc.setFont('helvetica', 'normal');
             doc.text('© Copyright 2026: Zaqueu Fernandes (88)9.9401-4262', 105, 282, { align: 'center' });
             doc.setFontSize(7); doc.text(`Gerado em: ${dataHora}`, 190, 282, { align: 'right' });
 
