@@ -62,10 +62,7 @@
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; }
         .modal-content { background: white; padding: 30px; border-radius: 16px; max-width: 400px; width: 90%; text-align: center; color: #2d3748; }
         .pix-key { background: #f7fafc; padding: 12px; border-radius: 8px; border: 2px dashed #cbd5e0; font-family: monospace; margin: 15px 0 5px 0; font-weight: bold; font-size: 14px; word-break: break-all; }
-        
-        /* AJUSTE REALIZADO AQUI: Removido o uppercase */
         .favorecido-info { font-size: 12px; color: #718096; margin-bottom: 15px; font-weight: 600; letter-spacing: 0.5px; }
-        
         .close-modal { margin-top: 15px; background: #e2e8f0; color: #4a5568; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
         .result { margin-top: 24px; padding: 24px; border-radius: 12px; border: 4px solid; text-align: center; display: none; }
@@ -111,6 +108,7 @@
                             <option value="">Escolha o tipo de atividade</option>
                             <option value="I">Anexo I - Comércio</option>
                             <option value="II">Anexo II - Indústria</option>
+                            <option value="III">Anexo III - Serviços (Sem Fator R)</option>
                             <option value="IV">Anexo IV - Serviços (INSS Patronal fora)</option>
                             <option value="FATOR_R">Serviços (Sujeitos ao Fator R)</option>
                         </select>
@@ -196,7 +194,7 @@
             'I': [{ faixaAte: 180000, aliquota: 4, deducao: 0 }, { faixaAte: 360000, aliquota: 7.3, deducao: 5940 }, { faixaAte: 720000, aliquota: 9.5, deducao: 13860 }, { faixaAte: 1800000, aliquota: 10.7, deducao: 22500 }, { faixaAte: 3600000, aliquota: 14.3, deducao: 87300 }, { faixaAte: 4800000, aliquota: 19, deducao: 378000 }],
             'II': [{ faixaAte: 180000, aliquota: 4.5, deducao: 0 }, { faixaAte: 360000, aliquota: 7.8, deducao: 5940 }, { faixaAte: 720000, aliquota: 10, deducao: 13860 }, { faixaAte: 1800000, aliquota: 11.2, deducao: 22500 }, { faixaAte: 3600000, aliquota: 14.7, deducao: 85500 }, { faixaAte: 4800000, aliquota: 30, deducao: 720000 }],
             'III': [{ faixaAte: 180000, aliquota: 6, deducao: 0 }, { faixaAte: 360000, aliquota: 11.2, deducao: 9360 }, { faixaAte: 720000, aliquota: 13.5, deducao: 17640 }, { faixaAte: 1800000, aliquota: 16, deducao: 35640 }, { faixaAte: 3600000, aliquota: 21, deducao: 125640 }, { faixaAte: 4800000, aliquota: 33, deducao: 648000 }],
-            'IV': [{ faixaAte: 180000, aliquota: 4.5, deducao: 0 }, { faixaAte: 360000, aliquota: 9, deducao: 8100 }, { faixaAte: 720000, aliquota: 10.2, deducao: 12420 }, { faixaAte: 1800000, aliquota: 14, deducao: 39780 }, { faixaAte: 3600000, aliquota: 22, deducao: 183780 }, { faixaAte: 4800000, aliquota: 33, doc: 828000 }],
+            'IV': [{ faixaAte: 180000, aliquota: 4.5, deducao: 0 }, { faixaAte: 360000, aliquota: 9, deducao: 8100 }, { faixaAte: 720000, aliquota: 10.2, deducao: 12420 }, { faixaAte: 1800000, aliquota: 14, deducao: 39780 }, { faixaAte: 3600000, aliquota: 22, deducao: 183780 }, { faixaAte: 4800000, aliquota: 33, deducao: 828000 }],
             'V': [{ faixaAte: 180000, aliquota: 15.5, deducao: 0 }, { faixaAte: 360000, aliquota: 18, deducao: 4500 }, { faixaAte: 720000, aliquota: 19.5, deducao: 9900 }, { faixaAte: 1800000, aliquota: 20.5, deducao: 17100 }, { faixaAte: 3600000, aliquota: 23, deducao: 62100 }, { faixaAte: 4800000, aliquota: 30.5, deducao: 540000 }]
         };
 
@@ -242,7 +240,7 @@
             if (!isChecked) { input.classList.remove('error'); err.classList.remove('show'); return true; }
             if (rawValue === "" || rawValue === "000") { input.classList.add('error'); err.textContent = "⚠️ Este campo não pode ser vazio"; err.classList.add('show'); return false; }
             if (val < 0) { input.classList.add('error'); err.textContent = "⚠️ O valor não pode ser menor que zero"; err.classList.add('show'); return false; }
-            if (isProlabore && val < MIN_PROLABORE) { input.classList.add('error'); err.textContent = `⚠️ Mínimo legal: R$ 1.621,00 (Salário mínimo vigente 2026)`; err.classList.add('show'); return false; }
+            if (isProlabore && val < MIN_PROLABORE) { input.classList.add('error'); err.textContent = `⚠️ Mínimo legal: R$ 1.621,00`; err.classList.add('show'); return false; }
             input.classList.remove('error'); err.classList.remove('show'); return true;
         }
 
@@ -252,14 +250,33 @@
         });
 
         document.getElementById('temProlabore').onclick = function() { 
-            document.getElementById('fieldProlabore').classList.toggle('show', this.checked);
+            const input = document.getElementById('valorProlabore');
+            const field = document.getElementById('fieldProlabore');
+            const err = document.getElementById('errorProlabore');
+            field.classList.toggle('show', this.checked);
+            if(!this.checked) {
+                input.value = "";
+                input.classList.remove('error');
+                err.classList.remove('show');
+            }
             ocultarResultados();
             validarCampoFatorR('valorProlabore', 'errorProlabore', 'temProlabore', true);
+            calcularPrevia(); // Garante atualização da prévia ao desmarcar
         };
+
         document.getElementById('temFolha').onclick = function() { 
-            document.getElementById('fieldFolha').classList.toggle('show', this.checked);
+            const input = document.getElementById('valorFolha');
+            const field = document.getElementById('fieldFolha');
+            const err = document.getElementById('errorFolha');
+            field.classList.toggle('show', this.checked);
+            if(!this.checked) {
+                input.value = "";
+                input.classList.remove('error');
+                err.classList.remove('show');
+            }
             ocultarResultados();
             validarCampoFatorR('valorFolha', 'errorFolha', 'temFolha', false);
+            calcularPrevia(); // Garante atualização da prévia ao desmarcar
         };
 
         function calcularPrevia() {
@@ -349,7 +366,7 @@
             doc.setFontSize(14); doc.setFont('helvetica', 'bold');
             doc.text('VALOR DAS:', 25, y+5); doc.text(formatarMoeda(calculoAtual.vDas), 95, y+5);
             y += 25; doc.setFontSize(9); doc.setFont('helvetica', 'italic'); doc.setTextColor(100);
-            doc.text('Se essa ferramenta foi útil pra você, apoie com R$ 1,00 (Um Real) para manter este projeto gratuito.', 105, y, {align: 'center'});
+            doc.text('Se essa ferramenta foi útil pra você, apoie com R$ 1,00 para manter este projeto gratuito.', 105, y, {align: 'center'});
             doc.text(`Chave PIX: ${document.getElementById('chavePix').textContent}`, 105, y+5, {align: 'center'});
             doc.text(FAVORECIDO_NOME, 105, y+10, {align: 'center'});
             doc.setLineWidth(0.1); doc.line(20, 275, 190, 275); doc.setFont('helvetica', 'normal');
